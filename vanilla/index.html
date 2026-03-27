@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Saketh — AI & ML Engineer | Portfolio</title>
+    <meta name="description"
+        content="Portfolio of G.L.N.S.S. Saketh — AI & ML Engineer, Computer Vision Enthusiast. Building intelligent systems that see, learn, and solve real-world problems." />
+    <meta name="author" content="G.L.N.S.S. Saketh" />
+    <meta name="keywords" content="AI, ML, Machine Learning, Computer Vision, Portfolio, Saketh, Deep Learning, Python" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Saketh — AI & ML Engineer" />
+    <meta property="og:description"
+        content="Building intelligent systems that see, learn, and solve real-world problems. Passionate about end-to-end ML pipelines and deep learning." />
+    <meta property="og:url" content="https://saketh.dev" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Saketh — AI & ML Engineer" />
+    <meta name="twitter:description"
+        content="Building intelligent systems that see, learn, and solve real-world problems." />
+
+    <!-- Theme Color -->
+    <meta name="theme-color" content="#0B0F1A" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <!-- Preloader -->
+    <div id="preloader" class="preloader">
+        <div class="preloader-inner">
+            <div class="preloader-ring"></div>
+            <span class="preloader-text">Saketh</span>
+        </div>
+    </div>
+
+    <div class="portfolio-app">
+        <!-- Background Elements -->
+        <canvas id="particleCanvas"></canvas>
+        <div class="hero-spotlight"></div>
+
+        <!-- Scroll Progress -->
+        <div class="scroll-progress-container">
+            <div id="scroll-progress-bar" class="scroll-progress-bar" style="width: 0%">
+                <div class="scroll-progress-glow"></div>
+            </div>
+        </div>
+
+        <!-- Side Navigation dots -->
+        <nav id="side-nav" class="side-nav">
+            <div class="side-nav-track"></div>
+            <!-- Dynamic dots will be injected here -->
+        </nav>
+
+        <!-- Navbar -->
+        <header id="navbar" class="navbar">
+            <div id="nav-overlay" class="nav-overlay"></div>
+            <div class="nav-container">
+                <a href="#home" class="nav-logo">
+                    <div class="logo-icon"><i class="fas fa-terminal"></i></div>
+                    <span id="logo-text">Saketh</span>
+                </a>
+
+                <div class="nav-pill">
+                    <div class="nav-pill-glow"></div>
+                    <div id="nav-pill-indicator" class="nav-pill-indicator"></div>
+                    <nav id="nav-menu-desktop" class="nav-menu-desktop">
+                        <!-- Dynamic desktop links -->
+                    </nav>
+                </div>
+
+                <nav id="nav-menu-mobile" class="nav-menu">
+                    <!-- Dynamic mobile links -->
+                </nav>
+
+                <div class="nav-actions">
+                    <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    <button id="nav-hamburger" class="nav-hamburger" aria-label="Open menu">
+                        <span></span><span></span><span></span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <main>
+            <!-- Hero Section -->
+            <section id="home" class="section reveal">
+                <div class="container hero-grid">
+                    <div class="hero-text">
+                        <div class="hero-badge"><span class="badge-dot"></span><span id="hero-badge-text">Available for opportunities</span></div>
+                        <h1 class="hero-name">
+                            <span id="hero-greeting">Hi, I'm</span>
+                            <span class="hero-name-typing gradient-text">
+                                <span id="typing-text"></span><span class="typing-cursor"></span>
+                            </span>
+                        </h1>
+                        <p class="hero-role"><span class="role-icon">⚡</span><span id="hero-role-text">AI & ML Engineer</span></p>
+                        <p id="hero-description" class="hero-desc"></p>
+                        <div id="hero-buttons" class="hero-cta">
+                            <!-- Dynamic buttons -->
+                        </div>
+                        <div id="hero-socials" class="hero-socials">
+                            <!-- Dynamic socials -->
+                        </div>
+                    </div>
+                    <div class="hero-visual">
+                        <div id="hero-avatar-wrap" class="hero-avatar-wrap">
+                            <div class="avatar-glow"></div>
+                            <div class="avatar-ring"></div>
+                            <div id="avatar-container">
+                                <!-- Avatar image or placeholder -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="scroll-indicator">
+                        <div class="scroll-mouse"><div class="scroll-wheel"></div></div>
+                        <span>Scroll to explore</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- About Section -->
+            <section id="about" class="section reveal">
+                <div class="container">
+                    <h2 class="section-heading">
+                        <span class="heading-num">01.</span>
+                        <span id="about-title-text">About Me</span>
+                        <span class="heading-line"></span>
+                    </h2>
+                    <div class="about-bento-grid">
+                        <div class="bento-card bento-about-main glass-card">
+                            <div class="bento-accent-glow"></div>
+                            <div class="bento-content-wrapper">
+                                <div class="bento-icon-badge"><i class="fas fa-user-astronaut"></i></div>
+                                <div class="bento-header">
+                                    <span class="bento-subtitle">The Story</span>
+                                    <h3 id="about-display-title"></h3>
+                                </div>
+                                <p id="about-description" class="bento-description"></p>
+                            </div>
+                        </div>
+                        <div class="bento-card bento-about-role glass-card">
+                            <div class="bento-icon-badge role-icon"><i class="fas fa-briefcase"></i></div>
+                            <div class="bento-header">
+                                <span class="bento-subtitle">Current Status</span>
+                                <h3>Now Building</h3>
+                            </div>
+                            <div class="role-credential">
+                                <div class="role-accent-line"></div>
+                                <div class="role-main">
+                                    <h4 id="current-role-title"></h4>
+                                    <p id="current-role-org"></p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bento-submissions-container">
+                            <div id="contribution-grids" class="grids-container side-by-side">
+                                <!-- GitHub and LeetCode grids -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Skills Section -->
+            <section id="skills" class="section reveal">
+                <div class="container">
+                    <h2 class="section-heading"><span class="heading-num">02.</span><span id="skills-title-text">Skills & Technologies</span><span class="heading-line"></span></h2>
+                    <div id="skills-grid" class="skills-grid">
+                        <!-- Dynamic skill cards -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Projects Section -->
+            <section id="projects" class="section reveal">
+                <div class="container">
+                    <h2 class="section-heading"><span class="heading-num">03.</span><span id="projects-title-text">Featured Projects</span><span class="heading-line"></span></h2>
+                    <div class="projects-search-bar">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="projects-search-input" placeholder="Search projects by name, topic, or language...">
+                        <span id="projects-count" class="projects-count">0 projects</span>
+                    </div>
+                    <div id="projects-list" class="projects-list">
+                        <!-- Skeleton or dynamic projects -->
+                        <div class="projects-loading">
+                            <!-- Skeleton cards injected by JS -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Experience Section -->
+            <section id="experience" class="section reveal">
+                <div class="container">
+                    <h2 class="section-heading"><span class="heading-num">04.</span><span id="experience-title-text">Experience</span><span class="heading-line"></span></h2>
+                    <div id="experience-timeline" class="timeline">
+                        <!-- Dynamic timeline items -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Certifications Section -->
+            <section id="certifications" class="section reveal">
+                <div class="container">
+                    <h2 class="section-heading"><span class="heading-num">05.</span><span id="certifications-title-text">Certifications</span><span class="heading-line"></span></h2>
+                    <div id="certs-grid" class="certs-grid">
+                        <!-- Dynamic cert cards -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Contact Section -->
+            <section id="contact" class="section reveal">
+                <div class="container">
+                    <h2 class="section-heading"><span class="heading-num">06.</span><span id="contact-title-text">Get In Touch</span><span class="heading-line"></span></h2>
+                    <div class="contact-card glass-card">
+                        <div class="contact-header">
+                            <h3 id="contact-heading">Let's Work Together</h3>
+                            <p id="contact-description"></p>
+                        </div>
+                        <div id="contact-info-grid" class="contact-info-grid">
+                            <!-- Dynamic contact links -->
+                        </div>
+                        <div id="contact-socials" class="contact-socials">
+                            <!-- Dynamic contact socials -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="container">
+                <div class="footer-content">
+                    <p id="footer-text"></p>
+                    <div class="footer-bottom">
+                        <button id="admin-trigger" class="admin-secret-link">ADMIN ACCESS</button>
+                    </div>
+                </div>
+            </div>
+        </footer>
+
+        <!-- Back to Top -->
+        <button id="back-to-top" class="back-to-top" aria-label="Back to top">
+            <i class="fas fa-arrow-up"></i>
+        </button>
+
+        <!-- Admin Login Overlay -->
+        <div id="admin-login-overlay" class="admin-login-overlay" style="display: none;">
+            <div class="admin-login-modal glass-card">
+                <h3>Admin Access</h3>
+                <form id="admin-login-form">
+                    <input type="password" id="admin-password" placeholder="Enter password" required>
+                    <div class="modal-actions">
+                        <button type="submit" class="btn btn-primary">Login</button>
+                        <button type="button" id="admin-cancel" class="btn btn-outline">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Admin Dashboard (Dynamic overlay) -->
+        <div id="admin-dashboard-container"></div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="script.js"></script>
+</body>
+
+</html>

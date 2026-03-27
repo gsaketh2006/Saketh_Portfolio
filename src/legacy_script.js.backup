@@ -1,0 +1,739 @@
+/* ===================================================
+   SAKETH PORTFOLIO — Full JS
+   All data loaded from JSON files for editability.
+   =================================================== */
+
+document.addEventListener('DOMContentLoaded', async () => {
+  // Load settings first (drives nav, footer, titles)
+  const settings = await loadJSON('settings.json');
+
+  initTheme();
+  applySettings(settings);
+  initNavigation();
+  initParticles();
+  initScrollProgress();
+  initBackToTop();
+  initScrollAnimations();
+
+  // Load all section data from JSON
+  await loadHero();
+  await loadAbout(settings);
+  await loadSkills();
+  await loadGitHubProjects(settings);
+  await loadExperience(settings);
+  await loadCertifications(settings);
+  await loadContact(settings);
+});
+
+// ========== UTILITY ==========
+async function loadJSON(path) {
+  try {
+    const r = await fetch(path + '?t=' + Date.now(), { cache: 'no-store' });
+    if (!r.ok) throw new Error(`Failed to load ${path}`);
+    return await r.json();
+  } catch (e) {
+    console.warn(`Could not load ${path}:`, e.message);
+    return null;
+  }
+}
+
+function debounce(fn, ms) {
+  let t;
+  return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); };
+}
+
+function observeNew(els) {
+  if (!window._observer) return;
+  els.forEach(el => { el.classList.add('reveal'); window._observer.observe(el); });
+}
+
+function animateCounter(el) {
+  const target = parseFloat(el.dataset.target);
+  const suffix = el.dataset.suffix || '';
+  const dur = 1400;
+  const start = performance.now();
+  function step(ts) {
+    const p = Math.min((ts - start) / dur, 1);
+    const ease = 1 - Math.pow(1 - p, 3);
+    el.textContent = Math.floor(target * ease) + suffix;
+    if (p < 1) requestAnimationFrame(step);
+    else el.textContent = target + suffix;
+  }
+  requestAnimationFrame(step);
+}
+
+// ========== SETTINGS ==========
+function applySettings(s) {
+  if (!s) return;
+  // Page title
+  const titleEl = document.getElementById('pageTitle');
+  if (titleEl && s.siteTitle) titleEl.textContent = s.siteTitle;
+
+  // Logo
+  const logoText = document.getElementById('logoText');
+  if (logoText && s.logoText) logoText.textContent = s.logoText;
+  const footerLogo = document.getElementById('footerLogoText');
+  if (footerLogo && s.logoText) footerLogo.textContent = s.logoText;
+
+  // Nav links
+  const navMenu = document.getElementById('navMenu');
+  if (navMenu && s.navLinks) {
+    navMenu.innerHTML = s.navLinks.map((l, i) =>
+      `<a href="${l.href}" class="nav-link${i === 0 ? ' active' : ''}" data-section="${l.section}">${l.text}</a>`
+    ).join('');
+  }
+
+  // Section titles
+  if (s.sectionTitles) {
+    Object.entries(s.sectionTitles).forEach(([key, val]) => {
+      const el = document.getElementById(`${key}Title`) || document.getElementById(`${key}SectionTitle`);
+      if (el) el.textContent = val;
+    });
+  }
+
+  // Scroll text
+  const scrollText = document.getElementById('scrollText');
+  if (scrollText && s.scrollIndicatorText) scrollText.textContent = s.scrollIndicatorText;
+
+  // Footer
+  if (s.footer) {
+    const ft = document.getElementById('footerText');
+    if (ft) ft.textContent = `${s.footer.text} · © ${s.footer.year}`;
+    const fl = document.getElementById('footerLinks');
+    if (fl && s.footer.socialLinks) {
+      fl.innerHTML = s.footer.socialLinks.map(l =>
+        `<a href="${l.url}" target="_blank" rel="noopener"><i class="${l.icon}"></i></a>`
+      ).join('');
+    }
+  }
+}
+
+// ========== THEME ==========
+function initTheme() {
+  const toggle = document.getElementById('themeToggle');
+  const icon = document.getElementById('themeIcon');
+  const saved = localStorage.getItem('theme');
+  if (saved === 'light') {
+    document.documentElement.setAttribute('data-theme', 'light');
+    if (icon) icon.className = 'fas fa-sun';
+  } else {
+    document.documentElement.setAttribute('data-theme', 'dark');
+    if (icon) icon.className = 'fas fa-moon';
+  }
+  if (toggle) {
+    toggle.addEventListener('click', () => {
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
+      if (icon) icon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
+      localStorage.setItem('theme', isDark ? 'light' : 'dark');
+    });
+  }
+}
+
+// ========== NAVIGATION ==========
+function initNavigation() {
+  const navbar = document.getElementById('navbar');
+  const hamburger = document.getElementById('navHamburger');
+  const menu = document.getElementById('navMenu');
+  const indicator = document.getElementById('navIndicator');
+  const pill = document.querySelector('.nav-pill');
+
+  // Move sliding indicator to the active link
+  function moveIndicator() {
+    if (!indicator || !pill) return;
+    const activeLink = menu ? menu.querySelector('.nav-link.active') : null;
+    if (activeLink) {
+      const pillRect = pill.getBoundingClientRect();
+      const linkRect = activeLink.getBoundingClientRect();
+      indicator.style.left = (linkRect.left - pillRect.left) + 'px';
+      indicator.style.width = linkRect.width + 'px';
+      indicator.style.opacity = '';
+    } else {
+      indicator.style.opacity = '0';
+    }
+  }
+
+  // Shrink on scroll
+  window.addEventListener('scroll', () => {
+    if (navbar) navbar.classList.toggle('scrolled', window.scrollY > 50);
+  });
+
+  // Overlay
+  const overlay = document.createElement('div');
+  overlay.className = 'nav-overlay';
+  document.body.appendChild(overlay);
+
+  const toggleMenu = () => {
+    if (!hamburger || !menu) return;
+    hamburger.classList.toggle('active');
+    menu.classList.toggle('open');
+    overlay.classList.toggle('active');
+    document.body.style.overflow = menu.classList.contains('open') ? 'hidden' : '';
+  };
+
+  if (hamburger) hamburger.addEventListener('click', toggleMenu);
+  overlay.addEventListener('click', toggleMenu);
+
+  // Delegate nav link clicks (since links are loaded dynamically)
+  if (menu) {
+    menu.addEventListener('click', (e) => {
+      const link = e.target.closest('.nav-link');
+      if (!link) return;
+      e.preventDefault();
+      const targetId = link.getAttribute('href');
+      const target = document.querySelector(targetId);
+      if (!target) return;
+
+      if (menu.classList.contains('open')) toggleMenu();
+
+      menu.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+      link.classList.add('active');
+      moveIndicator();
+
+      const offset = navbar ? navbar.offsetHeight + 20 : 100;
+      window.scrollTo({ top: Math.max(0, target.offsetTop - offset), behavior: 'smooth' });
+      history.pushState(null, '', targetId);
+    });
+  }
+
+  // Scroll-spy
+  const updateActive = debounce(() => {
+    const links = document.querySelectorAll('.nav-link');
+    const sections = document.querySelectorAll('.section');
+    let current = '';
+    const scrollPos = window.scrollY + (navbar ? navbar.offsetHeight : 80) + 100;
+    sections.forEach(sec => {
+      if (scrollPos >= sec.offsetTop && scrollPos < sec.offsetTop + sec.offsetHeight) {
+        current = sec.id;
+      }
+    });
+    if (current) {
+      links.forEach(l => {
+        l.classList.remove('active');
+        if (l.dataset.section === current) l.classList.add('active');
+      });
+      moveIndicator();
+    }
+  }, 80);
+  window.addEventListener('scroll', updateActive);
+
+  // Position indicator after nav links are rendered
+  // Use a MutationObserver on the menu to detect when links appear
+  if (menu) {
+    const obs = new MutationObserver(() => {
+      requestAnimationFrame(moveIndicator);
+    });
+    obs.observe(menu, { childList: true });
+  }
+
+  // Reposition on resize
+  window.addEventListener('resize', debounce(moveIndicator, 100));
+}
+
+// ========== PARTICLES ==========
+function initParticles() {
+  const canvas = document.getElementById('particleCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const resize = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; };
+  resize();
+  window.addEventListener('resize', resize);
+
+  const particles = [];
+  const count = Math.min(55, Math.floor(window.innerWidth / 28));
+
+  class Particle {
+    constructor() {
+      this.x = Math.random() * canvas.width;
+      this.y = Math.random() * canvas.height;
+      this.size = Math.random() * 2.2 + 0.7;
+      this.vx = (Math.random() - 0.5) * 0.5;
+      this.vy = (Math.random() - 0.5) * 0.5;
+      this.opacity = Math.random() * 0.45 + 0.18;
+      this.hue = Math.random() * 40 + 220; // lavender-blue range
+    }
+    update() {
+      this.x += this.vx; this.y += this.vy;
+      if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+      if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+    }
+    draw() {
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+      ctx.fillStyle = `hsla(${this.hue}, 55%, 72%, ${this.opacity})`;
+      ctx.fill();
+    }
+  }
+
+  for (let i = 0; i < count; i++) particles.push(new Particle());
+
+  function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particles.forEach(p => { p.update(); p.draw(); });
+    for (let i = 0; i < particles.length; i++) {
+      for (let j = i + 1; j < particles.length; j++) {
+        const dx = particles[i].x - particles[j].x;
+        const dy = particles[i].y - particles[j].y;
+        const d = Math.sqrt(dx * dx + dy * dy);
+        if (d < 130) {
+          ctx.beginPath();
+          ctx.moveTo(particles[i].x, particles[i].y);
+          ctx.lineTo(particles[j].x, particles[j].y);
+          ctx.strokeStyle = `hsla(230, 50%, 68%, ${0.1 * (1 - d / 130)})`;
+          ctx.lineWidth = 0.7;
+          ctx.stroke();
+        }
+      }
+    }
+    requestAnimationFrame(animate);
+  }
+  animate();
+}
+
+// ========== SCROLL ANIMATIONS ==========
+function initScrollAnimations() {
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        entry.target.querySelectorAll('.stat-number[data-target]').forEach(c => {
+          if (!c.dataset.animated) { c.dataset.animated = '1'; animateCounter(c); }
+        });
+      }
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -50px 0px' });
+
+  window._observer = obs;
+
+  document.querySelectorAll('.section').forEach(el => {
+    el.classList.add('reveal');
+    obs.observe(el);
+  });
+}
+
+// ========== SCROLL PROGRESS ==========
+function initScrollProgress() {
+  const bar = document.getElementById('scrollProgress');
+  if (!bar) return;
+  window.addEventListener('scroll', () => {
+    const total = document.documentElement.scrollHeight - window.innerHeight;
+    bar.style.width = total > 0 ? (window.scrollY / total * 100) + '%' : '0%';
+  });
+}
+
+// ========== BACK TO TOP ==========
+function initBackToTop() {
+  const btn = document.getElementById('backToTop');
+  if (!btn) return;
+  window.addEventListener('scroll', () => { btn.classList.toggle('visible', window.scrollY > 400); });
+  btn.addEventListener('click', () => { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+}
+
+// ========== HERO (from hero.json) ==========
+async function loadHero() {
+  const data = await loadJSON('hero.json');
+  if (!data) return;
+
+  const heroContent = document.getElementById('heroContent');
+  if (!heroContent) return;
+
+  // Build hero HTML
+  const buttonsHTML = (data.buttons || []).map(b =>
+    `<a href="${b.href}" class="btn btn-${b.type}"><span>${b.text}</span><i class="${b.icon}"></i></a>`
+  ).join('');
+
+  const socialsHTML = (data.socialLinks || []).map(s =>
+    `<a href="${s.url}" target="${s.url.startsWith('mailto') ? '_self' : '_blank'}" rel="noopener" aria-label="${s.label}"><i class="${s.icon}"></i></a>`
+  ).join('');
+
+  heroContent.innerHTML = `
+    <div class="hero-badge"><span class="badge-dot"></span>${data.badgeText || 'Available'}</div>
+    <h1 class="hero-name">${data.greeting || 'Hi, I\'m'} <span class="gradient-text"><span id="typingText"></span><span class="cursor-blink">|</span></span></h1>
+    <p class="hero-role"><span class="role-icon">⚡</span>${data.role || ''}</p>
+    <p class="hero-desc">${data.description || ''}</p>
+    <div class="hero-cta">${buttonsHTML}</div>
+    <div class="hero-socials">${socialsHTML}</div>
+  `;
+
+  // Wire up hero buttons for smooth scrolling
+  heroContent.querySelectorAll('.btn').forEach(btn => {
+    const href = btn.getAttribute('href');
+    if (href && href.startsWith('#')) {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const target = document.querySelector(href);
+        if (target) {
+          const navbar = document.getElementById('navbar');
+          const offset = navbar ? navbar.offsetHeight + 20 : 100;
+          window.scrollTo({ top: Math.max(0, target.offsetTop - offset), behavior: 'smooth' });
+        }
+      });
+    }
+  });
+
+  // Orbit icons
+  const orbitRing = document.getElementById('orbitRing');
+  if (orbitRing && data.orbitIcons) {
+    orbitRing.innerHTML = data.orbitIcons.map(icon =>
+      `<div class="orbit-dot"><i class="${icon}"></i></div>`
+    ).join('');
+  }
+
+  // Start typing
+  if (data.typingTexts) {
+    startTyping(data.typingTexts);
+  }
+}
+
+function startTyping(texts) {
+  const el = document.getElementById('typingText');
+  if (!el || !texts.length) return;
+  let idx = 0, charIdx = 0, deleting = false;
+  function type() {
+    const current = texts[idx];
+    if (deleting) { charIdx--; } else { charIdx++; }
+    el.textContent = current.substring(0, charIdx);
+    if (!deleting && charIdx === current.length) {
+      deleting = true; setTimeout(type, 2000);
+    } else if (deleting && charIdx === 0) {
+      deleting = false; idx = (idx + 1) % texts.length; setTimeout(type, 400);
+    } else {
+      setTimeout(type, deleting ? 35 : 70);
+    }
+  }
+  type();
+}
+
+// ========== ABOUT (from about.json) ==========
+async function loadAbout(settings) {
+  const data = await loadJSON('about.json');
+  if (!data) return;
+
+  // Section title
+  if (settings && settings.sectionTitles && settings.sectionTitles.about) {
+    const t = document.getElementById('aboutTitle');
+    if (t) t.textContent = settings.sectionTitles.about;
+  }
+
+  const grid = document.getElementById('aboutGrid');
+  if (!grid) return;
+
+  // Main card
+  let html = `<div class="bento-card bento-main glass-card reveal">
+    <div class="bento-icon"><i class="fas fa-user-astronaut"></i></div>
+    <h3>${data.title || 'Who I Am'}</h3>
+    <p>${data.description || ''}</p>
+  </div>`;
+
+  // Stats
+  if (data.stats) {
+    data.stats.forEach(s => {
+      html += `<div class="bento-card bento-stat glass-card reveal">
+        <div class="stat-number" data-target="${s.value}" data-suffix="${s.suffix || ''}">0</div>
+        <div class="stat-label">${s.label}</div>
+      </div>`;
+    });
+  }
+
+  // Info cards
+  if (data.infoCards) {
+    data.infoCards.forEach(c => {
+      html += `<div class="bento-card bento-info glass-card reveal">
+        <i class="${c.icon}"></i>
+        <h4>${c.title}</h4>
+        <p>${c.value}</p>
+      </div>`;
+    });
+  }
+
+  grid.innerHTML = html;
+  observeNew(grid.querySelectorAll('.bento-card'));
+}
+
+// ========== SKILLS (from skills.json) ==========
+async function loadSkills() {
+  const data = await loadJSON('skills.json');
+  if (!data) return;
+  const grid = document.getElementById('skillsGrid');
+  if (!grid) return;
+
+  const icons = {
+    programming: 'fa-code', language: 'fa-code', web: 'fa-globe',
+    technolog: 'fa-globe', database: 'fa-database', cloud: 'fa-cloud',
+    tool: 'fa-wrench', analytics: 'fa-chart-bar', library: 'fa-layer-group',
+    framework: 'fa-cubes', operating: 'fa-desktop',
+  };
+  const grads = [
+    'linear-gradient(135deg, #7B8CDE, #A8B4F0)',
+    'linear-gradient(135deg, #7EC8E3, #B3E0F2)',
+    'linear-gradient(135deg, #81E6D9, #B2F5EA)',
+    'linear-gradient(135deg, #A78BFA, #C4B5FD)',
+    'linear-gradient(135deg, #F9A8D4, #FBCFE8)',
+    'linear-gradient(135deg, #93C5FD, #BFDBFE)',
+  ];
+
+  grid.innerHTML = '';
+  Object.entries(data).forEach(([cat, skills], i) => {
+    const key = Object.keys(icons).find(k => cat.toLowerCase().includes(k));
+    const ic = key ? icons[key] : 'fa-star';
+    const grad = grads[i % grads.length];
+    const card = document.createElement('div');
+    card.className = 'skill-card glass-card reveal';
+    card.style.setProperty('--skill-gradient', grad);
+    card.innerHTML = `
+      <div class="skill-card-header">
+        <div class="skill-icon-wrap" style="background:${grad}"><i class="fas ${ic}"></i></div>
+        <h3>${cat}</h3>
+      </div>
+      <div class="skill-tags">${skills.map(s => `<span class="skill-tag">${s}</span>`).join('')}</div>
+    `;
+    grid.appendChild(card);
+  });
+  observeNew(grid.querySelectorAll('.skill-card'));
+}
+
+// ========== PROJECTS (from GitHub API — horizontal bars) ==========
+let allProjects = [];
+
+async function loadGitHubProjects(settings) {
+  const list = document.getElementById('projectsList');
+  const loader = document.getElementById('projectsLoading');
+  const search = document.getElementById('projectSearch');
+  const clearBtn = document.getElementById('searchClear');
+  if (!list || !loader) return;
+
+  const username = (settings && settings.githubUsername) || 'gsaketh2006';
+
+  try {
+    loader.style.display = 'flex';
+    list.innerHTML = '';
+
+    const res = await fetch(`https://api.github.com/users/${username}/repos?sort=updated&per_page=100`);
+    if (!res.ok) throw new Error('GitHub API error');
+    const repos = await res.json();
+
+    allProjects = repos.filter(r => !r.fork).map(r => ({
+      name: r.name,
+      description: r.description || 'No description available',
+      url: r.html_url,
+      homepage: r.homepage,
+      branch: r.default_branch || 'main',
+      topics: r.topics || [],
+      stars: r.stargazers_count,
+      forks: r.forks_count,
+    }));
+
+    renderProjects(allProjects);
+    updateCount(allProjects.length);
+
+    if (search) {
+      search.addEventListener('input', (e) => {
+        const term = e.target.value.toLowerCase().trim();
+        if (clearBtn) clearBtn.style.display = term ? 'flex' : 'none';
+        filterProjects(term);
+      });
+    }
+    if (clearBtn) {
+      clearBtn.addEventListener('click', () => {
+        if (search) { search.value = ''; search.dispatchEvent(new Event('input')); }
+      });
+    }
+  } catch (e) {
+    console.error('Projects error:', e);
+    list.innerHTML = `<div class="projects-error"><i class="fas fa-exclamation-triangle"></i><p>Failed to load projects. Please try again later.</p></div>`;
+  } finally {
+    loader.style.display = 'none';
+  }
+}
+
+function renderProjects(projects) {
+  const list = document.getElementById('projectsList');
+  if (!list) return;
+  if (!projects.length) {
+    list.innerHTML = `<div class="projects-empty"><i class="fas fa-search"></i><p>No projects found.</p></div>`;
+    return;
+  }
+
+  list.innerHTML = projects.map(p => {
+    const name = p.name.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+    const topics = p.topics.slice(0, 5).map(t => `<span class="project-topic-tag">${t}</span>`).join('');
+    const readmeUrl = `${p.url}/blob/${p.branch}/README.md`;
+    const websiteBtn = p.homepage
+      ? `<a href="${p.homepage}" target="_blank" rel="noopener" class="project-action-btn primary" onclick="event.stopPropagation()"><i class="fas fa-external-link-alt"></i> Live Demo</a>`
+      : '';
+
+    return `
+      <div class="project-bar glass-card reveal" onclick="window.open('${readmeUrl}','_blank')">
+        <div class="project-bar-body">
+          <div class="project-bar-top">
+            <div class="project-bar-title">
+              <h3>${name}</h3>
+              <div class="project-bar-meta">
+                ${p.stars > 0 ? `<span><i class="fas fa-star"></i> ${p.stars}</span>` : ''}
+                ${p.forks > 0 ? `<span><i class="fas fa-code-branch"></i> ${p.forks}</span>` : ''}
+              </div>
+            </div>
+            <div class="project-bar-actions">
+              ${websiteBtn}
+              <a href="${p.url}" target="_blank" rel="noopener" class="project-action-btn secondary" onclick="event.stopPropagation()"><i class="fab fa-github"></i> GitHub</a>
+            </div>
+          </div>
+          <p class="project-bar-desc">${p.description}</p>
+          ${topics ? `<div class="project-bar-topics">${topics}</div>` : ''}
+        </div>
+        <div class="project-bar-arrow"><i class="fas fa-chevron-right"></i></div>
+      </div>
+    `;
+  }).join('');
+
+  list.querySelectorAll('.project-bar').forEach((bar, i) => {
+    bar.style.transitionDelay = `${i * 0.06}s`;
+  });
+  observeNew(list.querySelectorAll('.project-bar'));
+}
+
+function filterProjects(term) {
+  if (!term) { renderProjects(allProjects); updateCount(allProjects.length); return; }
+  const filtered = allProjects.filter(p =>
+    p.name.toLowerCase().includes(term) ||
+    p.description.toLowerCase().includes(term) ||
+    p.topics.some(t => t.toLowerCase().includes(term))
+  );
+  renderProjects(filtered);
+  updateCount(filtered.length, allProjects.length);
+}
+
+function updateCount(current, total) {
+  const el = document.getElementById('projectsCount');
+  if (!el) return;
+  el.textContent = total && current < total
+    ? `${current} of ${total}`
+    : `${current} project${current !== 1 ? 's' : ''}`;
+}
+
+// ========== EXPERIENCE (from experience.json) ==========
+async function loadExperience(settings) {
+  const data = await loadJSON('experience.json');
+  if (!data) return;
+  const timeline = document.getElementById('experienceTimeline');
+  if (!timeline) return;
+  timeline.innerHTML = '';
+  data.forEach((exp, i) => {
+    const achievements = exp.achievements && exp.achievements.length
+      ? `<ul class="timeline-achievements">${exp.achievements.map(a => `<li>${a}</li>`).join('')}</ul>` : '';
+    const item = document.createElement('div');
+    item.className = 'timeline-item reveal';
+    item.style.transitionDelay = `${i * 0.15}s`;
+    item.innerHTML = `
+      <div class="timeline-marker"><i class="fas ${exp.icon || 'fa-briefcase'}"></i></div>
+      <div class="timeline-content glass-card">
+        <span class="timeline-date">${exp.date}</span>
+        <h3>${exp.title}</h3>
+        <h4>${exp.company}</h4>
+        <p class="timeline-desc">${exp.description}</p>
+        ${achievements}
+      </div>
+    `;
+    timeline.appendChild(item);
+  });
+  observeNew(timeline.querySelectorAll('.timeline-item'));
+}
+
+// ========== CERTIFICATIONS (from certifications.json) ==========
+async function loadCertifications(settings) {
+  const grid = document.getElementById('certificationsGrid');
+  if (!grid) return;
+
+  let data = null;
+  try {
+    const lr = await fetch('/api/linkedin-certifications');
+    if (lr.ok) { const d = await lr.json(); if (d.success && d.certifications) data = d.certifications; }
+  } catch (_) { }
+
+  if (!data) data = await loadJSON('certifications.json');
+  if (!data) return;
+
+  grid.innerHTML = '';
+  data.forEach((cert, i) => {
+    const date = cert.issueDate ? new Date(cert.issueDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short' }) : '';
+    const url = cert.credentialUrl || 'https://www.linkedin.com/in/guggilam-leela-naga-sai-sri-saketh-326853289/';
+    const fallback = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='200'%3E%3Crect fill='%230B0F1A' width='400' height='200'/%3E%3Ctext fill='%237B8CDE' font-family='sans-serif' font-size='17' font-weight='bold' x='200' y='85' text-anchor='middle'%3ECERTIFICATE%3C/text%3E%3Ctext fill='%2394A3B8' font-family='sans-serif' font-size='12' x='200' y='115' text-anchor='middle'%3E${encodeURIComponent(cert.organization)}%3C/text%3E%3C/svg%3E`;
+    const accentColor = cert.color || 'var(--lavender)';
+
+    const card = document.createElement('div');
+    card.className = 'cert-card glass-card reveal';
+    card.style.setProperty('--cert-accent', accentColor);
+    card.style.transitionDelay = `${i * 0.1}s`;
+    card.innerHTML = `
+      <div class="cert-card-image">
+        <img src="${cert.image}" alt="${cert.title}" onerror="this.onerror=null;this.src='${fallback}'">
+        <div class="cert-card-badge" style="background:${accentColor}"><i class="fas fa-check"></i></div>
+      </div>
+      <div class="cert-card-body">
+        <h3>${cert.title}</h3>
+        <span class="cert-card-org" style="color:${accentColor}">${cert.organization}</span>
+        ${date ? `<span class="cert-card-date"><i class="far fa-calendar-alt"></i> ${date}</span>` : ''}
+        <a href="${url}" target="_blank" rel="noopener" class="cert-card-link" style="color:${accentColor}" onclick="event.stopPropagation()">
+          <i class="fas fa-external-link-alt"></i> View Credential
+        </a>
+      </div>
+    `;
+    card.addEventListener('click', (e) => {
+      if (!e.target.closest('.cert-card-link')) window.open(url, '_blank');
+    });
+    grid.appendChild(card);
+  });
+  observeNew(grid.querySelectorAll('.cert-card'));
+}
+
+// ========== CONTACT (from contact.json) ==========
+async function loadContact(settings) {
+  const data = await loadJSON('contact.json');
+  if (!data) return;
+
+  const titleEl = document.getElementById('contactSectionTitle');
+  if (titleEl && data.title) titleEl.textContent = data.title;
+  const headEl = document.getElementById('contactHeading');
+  if (headEl && data.heading) headEl.textContent = data.heading;
+  const descEl = document.getElementById('contactDescription');
+  if (descEl && data.description) descEl.textContent = data.description;
+
+  const details = document.getElementById('contactDetails');
+  if (details) {
+    details.innerHTML = '';
+    [data.email, data.phone, data.location].filter(Boolean).forEach(item => {
+      const card = document.createElement('div');
+      card.className = 'contact-card glass-card reveal';
+      card.innerHTML = `
+        <i class="${item.icon}"></i>
+        <h4>${item.label}</h4>
+        ${item.link ? `<a href="${item.link}">${item.value}</a>` : `<p>${item.value}</p>`}
+      `;
+      details.appendChild(card);
+    });
+    observeNew(details.querySelectorAll('.contact-card'));
+  }
+
+  const social = document.getElementById('contactSocial');
+  if (social && data.socialLinks) {
+    social.innerHTML = data.socialLinks.map(s =>
+      `<a href="${s.url}" target="_blank" rel="noopener noreferrer" aria-label="${s.ariaLabel || s.platform}"><i class="${s.icon}"></i></a>`
+    ).join('');
+  }
+}
+
+// ========== HASH NAVIGATION ==========
+window.addEventListener('load', () => {
+  document.body.classList.add('loaded');
+  const hash = window.location.hash;
+  if (hash) {
+    const target = document.querySelector(hash);
+    if (target) {
+      setTimeout(() => {
+        const navbar = document.getElementById('navbar');
+        const offset = navbar ? navbar.offsetHeight + 20 : 100;
+        window.scrollTo({ top: target.offsetTop - offset, behavior: 'smooth' });
+      }, 500);
+    }
+  }
+});
