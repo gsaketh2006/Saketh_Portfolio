@@ -23,11 +23,6 @@ const Description = ({ title, description }) => {
                 {description}
             </p>
 
-            <div className="about-tags">
-                <span className="about-tag">AI & Machine Learning</span>
-                <span className="about-tag">Computer Vision</span>
-                <span className="about-tag">Full-Stack Development</span>
-            </div>
         </motion.div>
     );
 };

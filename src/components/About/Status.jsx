@@ -21,39 +21,14 @@ const Status = ({ roleTitle, roleOrg }) => {
             </div>
             
             <div className="status-list">
-                {/* Building */}
+                {/* Current Status */}
                 <div className="status-item">
                     <div className="status-indicator">
                         <div className="status-ping"></div>
                         <div className="status-dot"></div>
                     </div>
                     <div className="status-content">
-                        <h4>Building</h4>
                         <p>{roleTitle} @ {roleOrg}</p>
-                    </div>
-                </div>
-
-                {/* Learning */}
-                <div className="status-item">
-                    <div className="status-indicator">
-                        <div className="status-ping amber-ping"></div>
-                        <div className="status-dot amber-dot"></div>
-                    </div>
-                    <div className="status-content">
-                        <h4>Learning</h4>
-                        <p>Advanced Computer Vision & LLM Deployment</p>
-                    </div>
-                </div>
-
-                {/* Goals */}
-                <div className="status-item">
-                    <div className="status-indicator">
-                        <div className="status-ping subtle-ping"></div>
-                        <div className="status-dot subtle-dot"></div>
-                    </div>
-                    <div className="status-content">
-                        <h4>Goal</h4>
-                        <p>Scaling intelligent systems globally</p>
                     </div>
                 </div>
             </div>

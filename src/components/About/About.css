@@ -79,22 +79,6 @@
     font-size: 1rem;
 }
 
-.about-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    margin-top: auto;
-}
-
-.about-tag {
-    font-size: 0.75rem;
-    padding: 6px 14px;
-    background: rgba(255, 106, 61, 0.08);
-    border: 1px solid rgba(255, 106, 61, 0.2);
-    border-radius: 50px;
-    color: var(--accent);
-}
-
 /* ---- Status List & Indicators ---- */
 .status-list {
     display: flex;
@@ -128,9 +112,7 @@
     opacity: 0.7;
 }
 
-/* Secondary status colors */
-.amber-dot, .amber-ping { background: #FFB26B; }
-.subtle-dot, .subtle-ping { background: #666666; }
+/* Secondary status colors - currently unused */
 
 @keyframes status-ping {
     75%, 100% { transform: scale(3); opacity: 0; }
