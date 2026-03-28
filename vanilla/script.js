@@ -1107,6 +1107,7 @@ function renderCertificationsTab(parent) {
                 </div>
                 <div class="form-group"><label>Credential Title</label><input type="text" value="${cert.title}" oninput="state.data.certifications[${i}].title = this.value"></div>
                 <div class="form-group"><label>Organization</label><input type="text" value="${cert.organization}" oninput="state.data.certifications[${i}].organization = this.value"></div>
+                <div class="form-group" style="display:flex;gap:1rem;"><div style="flex:1;"><label>Issue Date</label><input style="width:100%" type="text" value="${cert.issueDate || ''}" placeholder="YYYY-MM-DD" oninput="state.data.certifications[${i}].issueDate = this.value"></div><div style="flex:1;"><label>Credential ID</label><input style="width:100%" type="text" value="${cert.credentialId || ''}" oninput="state.data.certifications[${i}].credentialId = this.value"></div></div>
                 <div class="form-group"><label>Credential URL</label><input type="text" value="${cert.credentialUrl}" oninput="state.data.certifications[${i}].credentialUrl = this.value"></div>
                 <div class="form-group"><label>Badge Image URL</label><input type="text" value="${cert.image}" oninput="state.data.certifications[${i}].image = this.value"></div>
             </div>

@@ -170,86 +170,109 @@ const Admin = ({ data, onSave, onExit }) => {
         try {
             setSaveFlash(false);
             
-            // 1. Sync portfolio_data (Profile)
-            const { error: profileError } = await supabase
-                .from('portfolio_data')
-                .upsert({
-                    id: '00000000-0000-0000-0000-000000000000',
-                    settings: editedData.settings,
-                    hero: editedData.hero,
-                    about: editedData.about,
-                    contact: editedData.contact,
-                    updated_at: new Date()
-                });
-            if (profileError) throw profileError;
+            const errors = [];
 
-            // 2. Sync Experience (Delete and Re-insert for simplicity and ordering)
-            await supabase.from('experience').delete().neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all
-            const { error: expError } = await supabase
-                .from('experience')
-                .insert(editedData.experience.map((exp, i) => ({
-                    ...exp,
-                    order_index: i
-                })));
-            if (expError) throw expError;
+            // 1. Sync Profile Data
+            try {
+                const { error: profileError } = await supabase
+                    .from('portfolio_data')
+                    .upsert({
+                        id: '00000000-0000-0000-0000-000000000000',
+                        settings: editedData.settings,
+                        hero: editedData.hero,
+                        about: editedData.about,
+                        contact: editedData.contact,
+                        updated_at: new Date()
+                    });
+                if (profileError) throw profileError;
+            } catch (e) { errors.push(`Profile: ${e.message}`); }
+
+            // 2. Sync Experience
+            try {
+                await supabase.from('experience').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+                if (editedData.experience?.length > 0) {
+                    const { error: expError } = await supabase
+                        .from('experience')
+                        .insert(editedData.experience.map((exp, i) => ({ ...exp, order_index: i })));
+                    if (expError) throw expError;
+                }
+            } catch (e) { errors.push(`Experience: ${e.message}`); }
 
             // 3. Sync Certifications
-            await supabase.from('certifications').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-            const { error: certError } = await supabase
-                .from('certifications')
-                .insert(editedData.certifications.map((cert, i) => ({
-                    title: cert.title || '',
-                    organization: cert.organization || '',
-                    image_url: cert.image || '',
-                    issue_date: cert.issueDate || '',
-                    credential_id: cert.credentialId || '',
-                    credential_url: cert.credentialUrl || '',
-                    color: cert.color || '#FF6A3D',
-                    order_index: i
-                })));
-            if (certError) throw certError;
+            try {
+                await supabase.from('certifications').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+                if (editedData.certifications?.length > 0) {
+                    const { error: certError } = await supabase
+                        .from('certifications')
+                        .insert(editedData.certifications.map((cert, i) => ({
+                            title: cert.title || '',
+                            organization: cert.organization || '',
+                            image_url: cert.image || '',
+                            issue_date: cert.issueDate || '',
+                            credential_id: cert.credentialId || '',
+                            credential_url: cert.credentialUrl || '',
+                            color: cert.color || '#FF6A3D',
+                            order_index: i
+                        })));
+                    if (certError) throw certError;
+                }
+            } catch (e) { errors.push(`Certifications: ${e.message}`); }
 
             // 4. Sync Projects
-            await supabase.from('projects').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-            if (editedData.projects?.length > 0) {
-                const { error: projError } = await supabase
-                    .from('projects')
-                    .insert(editedData.projects.map((p, i) => ({ 
-                        name: p.name || '',
-                        description: p.description || '',
-                        url: p.url || '',
-                        language: p.language || '',
-                        image_url: p.image_url || '',
-                        order_index: i 
-                    })));
-                if (projError) throw projError;
-            }
+            try {
+                await supabase.from('projects').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+                if (editedData.projects?.length > 0) {
+                    const { error: projError } = await supabase
+                        .from('projects')
+                        .insert(editedData.projects.map((p, i) => ({ 
+                            name: p.name || '',
+                            description: p.description || '',
+                            url: p.url || '',
+                            language: p.language || '',
+                            image_url: p.image_url || '',
+                            order_index: i 
+                        })));
+                    if (projError) {
+                        if (projError.code === 'PGRST204') {
+                            throw new Error('The "projects" table is missing the "image_url" column. Please run the SQL migration.');
+                        }
+                        throw projError;
+                    }
+                }
+            } catch (e) { errors.push(`Projects: ${e.message}`); }
 
             // 5. Sync Skills
-            await supabase.from('skills').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-            const flatSkills = [];
-            Object.entries(editedData.skills).forEach(([category, skills], catIdx) => {
-                skills.forEach((skill, skillIdx) => {
-                    flatSkills.push({
-                        category,
-                        skill_name: skill,
-                        order_index: (catIdx * 100) + skillIdx
+            try {
+                await supabase.from('skills').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+                const flatSkills = [];
+                Object.entries(editedData.skills).forEach(([category, skills], catIdx) => {
+                    skills.forEach((skill, skillIdx) => {
+                        flatSkills.push({
+                            category,
+                            skill_name: skill,
+                            order_index: (catIdx * 100) + skillIdx
+                        });
                     });
                 });
-            });
-            if (flatSkills.length > 0) {
-                const { error: skillsError } = await supabase
-                    .from('skills')
-                    .insert(flatSkills);
-                if (skillsError) throw skillsError;
-            }
+                if (flatSkills.length > 0) {
+                    const { error: skillsError } = await supabase
+                        .from('skills')
+                        .insert(flatSkills);
+                    if (skillsError) throw skillsError;
+                }
+            } catch (e) { errors.push(`Skills: ${e.message}`); }
 
-            onSave(editedData); // Update parent state locally
-            setSaveFlash(true);
-            setTimeout(() => setSaveFlash(false), 3000);
+            if (errors.length > 0) {
+                alert(`Some items failed to save:\n\n${errors.join('\n')}`);
+                console.error('Save errors:', errors);
+            } else {
+                onSave(editedData); // Update parent state locally
+                setSaveFlash(true);
+                setTimeout(() => setSaveFlash(false), 3000);
+            }
         } catch (error) {
-            console.error('Error saving to Supabase:', error);
-            alert('Error saving changes. Check console for details.');
+            console.error('Core Auth/Network Error:', error);
+            alert('A critical error occurred while saving. Please check your connection.');
         }
     };
 
@@ -574,6 +597,16 @@ const Admin = ({ data, onSave, onExit }) => {
                                             <label>Credential URL</label>
                                             <input type="text" value={cert.credentialUrl} onChange={e => handleArrayUpdate('certifications', idx, 'credentialUrl', e.target.value)} placeholder="https://..." />
                                         </div>
+                                        <div className="form-grid">
+                                            <div className="form-group">
+                                                <label>Issue Date</label>
+                                                <input type="text" value={cert.issueDate} onChange={e => handleArrayUpdate('certifications', idx, 'issueDate', e.target.value)} placeholder="YYYY-MM-DD" />
+                                            </div>
+                                            <div className="form-group">
+                                                <label>Credential ID</label>
+                                                <input type="text" value={cert.credentialId} onChange={e => handleArrayUpdate('certifications', idx, 'credentialId', e.target.value)} placeholder="ABC-123" />
+                                            </div>
+                                        </div>
                                         <div className="form-group">
                                             <label>Certificate Image</label>
                                             {cert.image && <img src={cert.image} alt="Preview" className="image-preview-admin" />}
@@ -587,7 +620,7 @@ const Admin = ({ data, onSave, onExit }) => {
                                     </div>
                                 ))}
                             </div>
-                            <button className="btn btn-outline full-width" style={{ marginTop: '20px' }} onClick={() => handleAddItem('certifications', { title: 'New Certification', organization: 'Org', image: '', credentialUrl: '#' })}>
+                            <button className="btn btn-outline full-width" style={{ marginTop: '20px' }} onClick={() => handleAddItem('certifications', { title: 'New Certification', organization: 'Org', image: '', credentialUrl: '#', issueDate: '', credentialId: '' })}>
                                 <i className="fas fa-plus"></i> Add Certification
                             </button>
                         </div>

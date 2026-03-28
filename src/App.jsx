@@ -39,20 +39,7 @@ const useCountUp = (end, duration = 2000, startOnView = true) => {
 };
 
 const App = () => {
-    const [data, setData] = useState(() => {
-        try {
-            const saved = localStorage.getItem('portfolio_data');
-            if (saved && saved !== 'undefined' && saved !== 'null') {
-                const parsed = JSON.parse(saved);
-                if (parsed && typeof parsed === 'object' && parsed.settings) {
-                    return parsed;
-                }
-            }
-        } catch (e) {
-            console.warn('LocalStorage data corrupted, falling back to initialData');
-        }
-        return initialData;
-    });
+    const [data, setData] = useState(initialData);
 
     const [theme, setTheme] = useState(() => {
         const saved = localStorage.getItem('theme');
@@ -93,6 +80,15 @@ const App = () => {
 
             if (certError) throw certError;
 
+            // Map snake_case from DB to camelCase for frontend
+            const mappedCertData = (certData || []).map(cert => ({
+                ...cert,
+                image: cert.image_url,
+                issueDate: cert.issue_date,
+                credentialId: cert.credential_id,
+                credentialUrl: cert.credential_url
+            }));
+
             // 4. Fetch skills
             const { data: skillsData, error: skillsError } = await supabase
                 .from('skills')
@@ -116,19 +112,17 @@ const App = () => {
                 skillsMap[s.category].push(s.skill_name);
             });
 
-            // Update main state only if we got valid profile data
-            if (profileData && profileData.settings) {
-                setData({
-                    settings: profileData.settings,
-                    hero: profileData.hero,
-                    about: profileData.about,
-                    contact: profileData.contact,
-                    experience: expData || [],
-                    certifications: certData || [],
-                    projects: projData || [],
-                    skills: skillsMap
-                });
-            }
+            // Update main state (Merge Supabase data with fallback settings if needed)
+            setData(prev => ({
+                settings: profileData?.settings || prev.settings,
+                hero: profileData?.hero || prev.hero,
+                about: profileData?.about || prev.about,
+                contact: profileData?.contact || prev.contact,
+                experience: expData?.length > 0 ? expData : prev.experience,
+                certifications: mappedCertData?.length > 0 ? mappedCertData : prev.certifications,
+                projects: projData?.length > 0 ? projData : prev.projects,
+                skills: Object.keys(skillsMap).length > 0 ? skillsMap : prev.skills
+            }));
 
         } catch (error) {
             console.error('Supabase Sync Error:', error.message);
@@ -678,9 +672,9 @@ const Skills = ({ data, settings }) => {
                             <h3>{cat}</h3>
                         </div>
                         <div className="skill-tags">
-                            {skills.map((s, j) => (
+                            {Array.from(new Set(skills)).map((s, j) => (
                                 <motion.span
-                                    key={s}
+                                    key={`${s}-${j}`}
                                     className="skill-tag"
                                     initial={{ opacity: 0, scale: 0.8 }}
                                     whileInView={{ opacity: 1, scale: 1 }}
@@ -723,14 +717,14 @@ const Projects = ({ settings, customProjects = [] }) => {
 
                 // Merge with custom projects from Supabase
                 const merged = [
-                    ...customProjects.map(p => ({ ...p, isGitHub: false })),
+                    ...customProjects.map(p => ({ ...p, isGitHub: false, topics: p.topics || [] })),
                     ...githubProjects
                 ];
                 
                 setProjects(merged);
             } catch (e) { 
                 console.error(e);
-                setProjects(customProjects.map(p => ({ ...p, isGitHub: false })));
+                setProjects(customProjects.map(p => ({ ...p, isGitHub: false, topics: p.topics || [] })));
             }
             setLoading(false);
         };
@@ -907,15 +901,32 @@ const Certifications = ({ data, settings }) => {
 // --- Cert Image with fallback ---
 const CertImage = ({ src, alt, color }) => {
     const [error, setError] = useState(false);
+    
+    // Reset error state when src changes
+    useEffect(() => {
+        setError(false);
+    }, [src]);
+
     if (error || !src) {
         return (
             <div className="cert-image-fallback" style={{ background: `linear-gradient(135deg, ${color || 'var(--lavender)'}, ${color || 'var(--sky)'}40)` }}>
                 <i className="fas fa-certificate"></i>
-                <span>{alt}</span>
+                <span style={{ fontSize: '0.8rem', marginTop: '8px', opacity: 0.8 }}>{alt}</span>
             </div>
         );
     }
-    return <img src={src} alt={alt} onError={() => setError(true)} />;
+
+    return (
+        <img 
+            src={src} 
+            alt={alt} 
+            loading="lazy" 
+            onError={() => {
+                console.warn(`Failed to load certification image: ${src}`);
+                setError(true);
+            }} 
+        />
+    );
 };
 
 // --- Contact ---

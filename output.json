@@ -1,0 +1,195 @@
+{
+  "certs": [
+    {
+      "id": "f34ecdac-52b0-4645-bc56-68dec90e0408",
+      "title": "AWS Certified Cloud Practitioner Updated",
+      "organization": "Amazon Web Services",
+      "image_url": "https://kcxwbwsnhfnithcerspy.supabase.co/storage/v1/object/public/portfolio-assets/certificates/1774685307616-python(basic).png",
+      "issue_date": "2024-01-15",
+      "credential_id": "AWS-CCP-12345",
+      "credential_url": "https://www.credly.com/badges/example",
+      "color": "#FF6A3D",
+      "order_index": 0,
+      "created_at": "2026-03-28T08:14:44.664579+00:00"
+    },
+    {
+      "id": "3bd44565-a6be-4708-8d03-4a60f60b531a",
+      "title": "New CertificatTest Certion",
+      "organization": "OrgTest Org",
+      "image_url": "",
+      "issue_date": "",
+      "credential_id": "",
+      "credential_url": "#https://example.com/cert",
+      "color": "#FF6A3D",
+      "order_index": 1,
+      "created_at": "2026-03-28T08:14:44.664579+00:00"
+    }
+  ],
+  "err1": null,
+  "port": [
+    {
+      "id": "00000000-0000-0000-0000-000000000000",
+      "settings": {
+        "footer": {
+          "text": "Designed & Built by Saketh",
+          "year": 2025
+        },
+        "logoText": "Saketh",
+        "navLinks": [
+          {
+            "href": "#home",
+            "text": "Home",
+            "section": "home"
+          },
+          {
+            "href": "#about",
+            "text": "About",
+            "section": "about"
+          },
+          {
+            "href": "#skills",
+            "text": "Skills",
+            "section": "skills"
+          },
+          {
+            "href": "#projects",
+            "text": "Projects",
+            "section": "projects"
+          },
+          {
+            "href": "#experience",
+            "text": "Experience",
+            "section": "experience"
+          },
+          {
+            "href": "#certifications",
+            "text": "Certifications",
+            "section": "certifications"
+          },
+          {
+            "href": "#contact",
+            "text": "Contact",
+            "section": "contact"
+          }
+        ],
+        "siteName": "Saketh",
+        "siteTitle": "Saketh — AI & ML Engineer",
+        "sectionTitles": {
+          "about": "About Me",
+          "skills": "Skills & Technologies",
+          "contact": "Get In Touch",
+          "projects": "Featured Projects",
+          "experience": "Experience",
+          "certifications": "Certifications"
+        },
+        "githubUsername": "gsaketh2006",
+        "leetcodeUsername": "saketh_g",
+        "scrollIndicatorText": "Scroll to explore"
+      },
+      "hero": {
+        "role": "AI & ML Engineer · Computer Vision Enthusiast",
+        "buttons": [
+          {
+            "href": "#contact",
+            "icon": "fas fa-arrow-right",
+            "text": "Let's Connect",
+            "type": "primary"
+          },
+          {
+            "href": "#projects",
+            "icon": "fas fa-code",
+            "text": "View Projects",
+            "type": "outline"
+          }
+        ],
+        "greeting": "Hi, I'm",
+        "badgeText": "Available for opportunities",
+        "resumeUrl": "",
+        "avatarImage": "",
+        "description": "I build intelligent systems that see, learn, and solve real-world problems. Passionate about end-to-end ML pipelines, deep learning, and crafting elegant solutions.",
+        "socialLinks": [
+          {
+            "url": "https://github.com/gsaketh2006",
+            "icon": "fab fa-github",
+            "label": "GitHub"
+          },
+          {
+            "url": "https://www.linkedin.com/in/guggilam-leela-naga-sai-sri-saketh-326853289/",
+            "icon": "fab fa-linkedin-in",
+            "label": "LinkedIn"
+          },
+          {
+            "url": "mailto:guggilamsaketh@gmail.com",
+            "icon": "fas fa-envelope",
+            "label": "Email"
+          }
+        ],
+        "typingTexts": [
+          "G.L.N.S.S. Saketh",
+          "AI & ML Engineer",
+          "CV Enthusiast",
+          "Problem Solver"
+        ]
+      },
+      "about": {
+        "title": "About Me",
+        "description": "I'm a passionate B.Tech CSE (AI & ML) student at SRM University–AP and a Computer Vision enthusiast. I enjoy solving real-world problems using machine learning, deep learning, and end-to-end model deployment. Learning | Building | Experimenting",
+        "currentRoleOrg": "SRM University-AP",
+        "showGithubGrid": true,
+        "currentRoleTitle": "Summer Research Intern",
+        "showLeetcodeGrid": true
+      },
+      "contact": {
+        "email": {
+          "icon": "fas fa-envelope",
+          "link": "mailto:guggilamsaketh@gmail.com",
+          "label": "Email",
+          "value": "guggilamsaketh@gmail.com"
+        },
+        "phone": {
+          "icon": "fas fa-phone",
+          "link": "tel:+1234567890",
+          "label": "Phone",
+          "value": "+1 (234) 567-890"
+        },
+        "title": "Get In Touch",
+        "heading": "Let's Work Together",
+        "location": {
+          "icon": "fas fa-map-marker-alt",
+          "link": null,
+          "label": "Location",
+          "value": "Andhra Pradesh, India"
+        },
+        "description": "I'm always open to discussing new projects, creative ideas, or opportunities to be part of your visions.",
+        "socialLinks": [
+          {
+            "url": "https://github.com",
+            "icon": "fab fa-github",
+            "platform": "GitHub",
+            "ariaLabel": "GitHub"
+          },
+          {
+            "url": "https://www.linkedin.com/in/guggilam-leela-naga-sai-sri-saketh-326853289/",
+            "icon": "fab fa-linkedin",
+            "platform": "LinkedIn",
+            "ariaLabel": "LinkedIn"
+          },
+          {
+            "url": "https://twitter.com",
+            "icon": "fab fa-twitter",
+            "platform": "Twitter",
+            "ariaLabel": "Twitter"
+          },
+          {
+            "url": "https://dribbble.com",
+            "icon": "fab fa-dribbble",
+            "platform": "Dribbble",
+            "ariaLabel": "Dribbble"
+          }
+        ]
+      },
+      "updated_at": "2026-03-28T08:14:43.306+00:00"
+    }
+  ],
+  "err2": null
+}

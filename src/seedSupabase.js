@@ -28,21 +28,25 @@ export const seedSupabase = async () => {
         else console.log('✅ Experience seeded.');
 
         // 3. Seed Certifications
-        const { error: certError } = await supabase
-            .from('certifications')
-            .insert(initialData.certifications.map((cert, i) => ({ 
-                title: cert.title || '',
-                organization: cert.organization || '',
-                image_url: cert.image || '',
-                issue_date: cert.issueDate || '',
-                credential_id: cert.credentialId || '',
-                credential_url: cert.credentialUrl || '',
-                color: cert.color || '#FF6A3D',
-                order_index: i 
-            })));
-        
-        if (certError) console.warn('Certifications seeding issue:', certError);
-        else console.log('✅ Certifications seeded.');
+        if (initialData.certifications?.length > 0) {
+            const { error: certError } = await supabase
+                .from('certifications')
+                .insert(initialData.certifications.map((cert, i) => ({ 
+                    title: cert.title || '',
+                    organization: cert.organization || '',
+                    image_url: cert.image || '',
+                    issue_date: cert.issueDate || '',
+                    credential_id: cert.credentialId || '',
+                    credential_url: cert.credentialUrl || '',
+                    color: cert.color || '#FF6A3D',
+                    order_index: i 
+                })));
+            
+            if (certError) console.warn('Certifications seeding issue:', certError);
+            else console.log('✅ Certifications seeded.');
+        } else {
+            console.log('✅ No Certifications to seed.');
+        }
 
         // 4. Seed Projects
         if (initialData.projects?.length > 0) {
