@@ -715,16 +715,25 @@ const Projects = ({ settings, customProjects = [] }) => {
                     isGitHub: true
                 }));
 
-                // Merge with custom projects from Supabase
-                const merged = [
-                    ...customProjects.map(p => ({ ...p, isGitHub: false, topics: p.topics || [] })),
-                    ...githubProjects
-                ];
+                // 1. Filter out hidden manual projects
+                const filteredCustom = customProjects
+                    .filter(p => p.source === 'manual')
+                    .filter(p => p.is_visible !== false)
+                    .map(p => ({ ...p, isGitHub: false, topics: p.topics || [] }));
+
+                // 2. Filter out hidden GitHub projects based on Supabase overrides
+                const filteredGithub = githubProjects.filter(repo => {
+                    const override = customProjects.find(p => p.name === repo.name && p.source === 'github');
+                    return !override || override.is_visible !== false;
+                }).map(p => ({ ...p, isGitHub: true }));
+
+                // 3. Merge both
+                const merged = [...filteredCustom, ...filteredGithub];
                 
                 setProjects(merged);
             } catch (e) { 
                 console.error(e);
-                setProjects(customProjects.map(p => ({ ...p, isGitHub: false, topics: p.topics || [] })));
+                setProjects(customProjects.filter(p => p.is_visible !== false).map(p => ({ ...p, isGitHub: false, topics: p.topics || [] })));
             }
             setLoading(false);
         };
@@ -805,13 +814,13 @@ const Projects = ({ settings, customProjects = [] }) => {
                                             </a>
                                         )}
                                         <a
-                                            href={`${p.url}/blob/HEAD/README.md`}
+                                            href={p.url}
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             className="project-action-btn secondary"
                                             onClick={(e) => e.stopPropagation()}
                                         >
-                                            <i className="fab fa-github"></i> README
+                                            <i className="fab fa-github"></i> github
                                         </a>
                                     </div>
                                 </div>

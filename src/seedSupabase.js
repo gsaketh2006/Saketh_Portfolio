@@ -58,6 +58,9 @@ export const seedSupabase = async () => {
                     url: p.url || '',
                     language: p.language || '',
                     image_url: p.image_url || '',
+                    is_visible: p.is_visible !== false,
+                    source: p.source || 'manual',
+                    github_id: p.github_id || null,
                     order_index: i 
                 })));
             if (projError) console.warn('Projects seeding issue:', projError);

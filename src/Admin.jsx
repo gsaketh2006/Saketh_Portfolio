@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import AdminAboutPanel from './components/AdminAboutPanel';
 import { supabase } from './lib/supabase';
 import { seedSupabase } from './seedSupabase';
@@ -8,6 +8,56 @@ const Admin = ({ data, onSave, onExit }) => {
     const [editedData, setEditedData] = useState(data);
     const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
     const [saveFlash, setSaveFlash] = useState(false);
+    const [projectSubTab, setProjectSubTab] = useState('active'); // 'active' or 'recycle'
+    const [githubRepos, setGithubRepos] = useState([]);
+    const [isLoadingGithub, setIsLoadingGithub] = useState(false);
+
+    useEffect(() => {
+        if (activeTab === 'projects' && githubRepos.length === 0) {
+            fetchGithubRepos();
+        }
+    }, [activeTab]);
+
+    const fetchGithubRepos = async () => {
+        setIsLoadingGithub(true);
+        try {
+            const username = editedData.settings?.githubUsername || 'gsaketh2006';
+            const res = await fetch(`https://api.github.com/users/${username}/repos?sort=updated&per_page=100`);
+            const data = await res.json();
+            if (Array.isArray(data)) {
+                setGithubRepos(data.filter(r => !r.fork));
+            }
+        } catch (e) {
+            console.error('Error fetching GitHub repos:', e);
+        }
+        setIsLoadingGithub(false);
+    };
+
+    const handleToggleVisibility = (project, source = 'manual') => {
+        setEditedData(prev => {
+            const projects = [...(prev.projects || [])];
+            const existingIdx = projects.findIndex(p => p.name === project.name);
+
+            if (existingIdx >= 0) {
+                projects[existingIdx] = { 
+                    ...projects[existingIdx], 
+                    is_visible: !projects[existingIdx].is_visible 
+                };
+            } else {
+                // If it's a GitHub project not in overrides yet, add it as hidden
+                projects.push({
+                    name: project.name,
+                    description: project.description,
+                    url: project.html_url || project.url,
+                    language: project.language,
+                    source: 'github',
+                    is_visible: false,
+                    github_id: project.id?.toString()
+                });
+            }
+            return { ...prev, projects };
+        });
+    };
 
     // --- Core Data Handlers ---
     const handleUpdate = (section, field, value) => {
@@ -230,6 +280,9 @@ const Admin = ({ data, onSave, onExit }) => {
                             url: p.url || '',
                             language: p.language || '',
                             image_url: p.image_url || '',
+                            is_visible: p.is_visible !== false,
+                            source: p.source || 'manual',
+                            github_id: p.github_id || null,
                             order_index: i 
                         })));
                     if (projError) {
@@ -528,27 +581,118 @@ const Admin = ({ data, onSave, onExit }) => {
                     {/* === PROJECTS === */}
                     {activeTab === 'projects' && (
                         <div className="admin-section">
-                            <h3><i className="fas fa-code-branch"></i> Custom Projects</h3>
-                            <p className="admin-hint">Manual projects will appear alongside your GitHub repositories.</p>
-                            {editedData.projects?.map((proj, idx) => (
-                                <div key={idx} className="admin-item-card">
-                                    <div className="card-header-admin">
-                                        <input type="text" className="input-bold" value={proj.name} onChange={e => handleArrayUpdate('projects', idx, 'name', e.target.value)} placeholder="Project Name" />
-                                        <button className="btn-delete" onClick={() => handleDeleteItem('projects', idx)}><i className="fas fa-trash"></i></button>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                                <h3><i className="fas fa-code-branch"></i> Project Management</h3>
+                                <button className="btn btn-outline btn-sm" onClick={fetchGithubRepos} disabled={isLoadingGithub}>
+                                    <i className={`fas fa-sync ${isLoadingGithub ? 'fa-spin' : ''}`}></i> Sync GitHub
+                                </button>
+                            </div>
+
+                            <div className="admin-tabs-secondary" style={{ display: 'flex', gap: '10px', marginBottom: '20px', borderBottom: '1px solid var(--border-color)', paddingBottom: '10px' }}>
+                                <button 
+                                    className={`admin-sub-tab ${projectSubTab === 'active' ? 'active' : ''}`} 
+                                    onClick={() => setProjectSubTab('active')}
+                                    style={{ background: 'none', border: 'none', color: projectSubTab === 'active' ? 'var(--accent)' : '#888', cursor: 'pointer', fontWeight: '600', padding: '5px 10px', borderBottom: projectSubTab === 'active' ? '2px solid var(--accent)' : '2px solid transparent' }}
+                                >
+                                    Active Projects
+                                </button>
+                                <button 
+                                    className={`admin-sub-tab ${projectSubTab === 'recycle' ? 'active' : ''}`} 
+                                    onClick={() => setProjectSubTab('recycle')}
+                                    style={{ background: 'none', border: 'none', color: projectSubTab === 'recycle' ? 'var(--accent)' : '#888', cursor: 'pointer', fontWeight: '600', padding: '5px 10px', borderBottom: projectSubTab === 'recycle' ? '2px solid var(--accent)' : '2px solid transparent' }}
+                                >
+                                    Recycle Bin
+                                </button>
+                            </div>
+
+                            {projectSubTab === 'active' ? (
+                                <>
+                                    <p className="admin-hint">Displaying all active GitHub and Manual projects currently visible on your site.</p>
+                                    
+                                    <div className="admin-items-grid">
+                                        {/* 1. Manual Projects (Visible) */}
+                                        {editedData.projects?.filter(p => p.source === 'manual' && p.is_visible !== false).map((proj, idx) => {
+                                            const realIdx = editedData.projects.indexOf(proj);
+                                            return (
+                                                <div key={`manual-${idx}`} className="admin-item-card" style={{ borderLeft: '4px solid var(--accent)' }}>
+                                                    <div className="card-header-admin">
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                            <i className="fas fa-user-edit" title="Manual Project" style={{ color: 'var(--accent)', fontSize: '0.8rem' }}></i>
+                                                            <input type="text" className="input-bold" value={proj.name} onChange={e => handleArrayUpdate('projects', realIdx, 'name', e.target.value)} />
+                                                        </div>
+                                                        <button className="btn-delete" onClick={() => handleToggleVisibility(proj, 'manual')} title="Move to Recycle Bin">
+                                                            <i className="fas fa-trash"></i>
+                                                        </button>
+                                                    </div>
+                                                    <div className="form-group">
+                                                        <textarea value={proj.description} onChange={e => handleArrayUpdate('projects', realIdx, 'description', e.target.value)} placeholder="Short description..." />
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+
+                                        {/* 2. GitHub Projects (Visible) */}
+                                        {githubRepos.filter(repo => {
+                                            const override = editedData.projects?.find(p => p.name === repo.name);
+                                            return !override || override.is_visible !== false;
+                                        }).map((repo, idx) => (
+                                            <div key={`github-${idx}`} className="admin-item-card" style={{ borderLeft: '4px solid #2ea44f', opacity: 0.9 }}>
+                                                <div className="card-header-admin">
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                        <i className="fab fa-github" title="GitHub Project" style={{ color: '#2ea44f', fontSize: '0.9rem' }}></i>
+                                                        <span className="input-bold">{repo.name}</span>
+                                                    </div>
+                                                    <button className="btn-delete" onClick={() => handleToggleVisibility(repo, 'github')} title="Hide from Frontend">
+                                                        <i className="fas fa-eye-slash"></i>
+                                                    </button>
+                                                </div>
+                                                <p style={{ fontSize: '0.85rem', color: '#888', margin: '5px 0' }}>{repo.description || 'No description provided.'}</p>
+                                                <div className="admin-item-footer" style={{ fontSize: '0.75rem', color: 'var(--accent)', marginTop: '5px' }}>
+                                                    <span><i className="fas fa-code"></i> {repo.language || 'Plain Text'}</span>
+                                                </div>
+                                            </div>
+                                        ))}
                                     </div>
-                                    <div className="form-group">
-                                        <label>Description</label>
-                                        <textarea value={proj.description} onChange={e => handleArrayUpdate('projects', idx, 'description', e.target.value)} />
+
+                                    <button className="btn btn-outline full-width" style={{ marginTop: '20px' }} onClick={() => handleAddItem('projects', { name: 'New Project', description: '', url: '#', language: 'React', source: 'manual', is_visible: true })}>
+                                        <i className="fas fa-plus"></i> Add Custom Project
+                                    </button>
+                                </>
+                            ) : (
+                                <>
+                                    <p className="admin-hint">Projects listed here are hidden from the frontend. You can restore them at any time.</p>
+                                    <div className="admin-items-grid">
+                                        {/* Hidden Projects (Both Source types) */}
+                                        {editedData.projects?.filter(p => p.is_visible === false).map((proj, idx) => {
+                                            const isGitHub = proj.source === 'github';
+                                            return (
+                                                <div key={`hidden-${idx}`} className="admin-item-card" style={{ opacity: 0.7, borderStyle: 'dashed' }}>
+                                                    <div className="card-header-admin">
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                            <i className={isGitHub ? 'fab fa-github' : 'fas fa-user-edit'} style={{ color: isGitHub ? '#2ea44f' : 'var(--accent)' }}></i>
+                                                            <span className="input-bold">{proj.name}</span>
+                                                        </div>
+                                                        <button 
+                                                            className="btn btn-outline btn-sm" 
+                                                            style={{ padding: '4px 8px', borderColor: 'var(--accent)', color: 'var(--accent)' }}
+                                                            onClick={() => handleToggleVisibility(proj, proj.source)}
+                                                        >
+                                                            <i className="fas fa-undo"></i> Restore
+                                                        </button>
+                                                    </div>
+                                                    <p style={{ fontSize: '0.85rem', color: '#666' }}>{proj.description || 'No description.'}</p>
+                                                </div>
+                                            );
+                                        })}
+                                        {(!editedData.projects || editedData.projects.filter(p => p.is_visible === false).length === 0) && (
+                                            <div className="projects-empty" style={{ gridColumn: '1 / -1', padding: '40px', textAlign: 'center' }}>
+                                                <i className="fas fa-trash-alt" style={{ fontSize: '2rem', color: '#333', marginBottom: '10px' }}></i>
+                                                <p>Your Recycle Bin is empty.</p>
+                                            </div>
+                                        )}
                                     </div>
-                                    <div className="form-grid">
-                                        <div className="form-group"><label>URL</label><input type="text" value={proj.url} onChange={e => handleArrayUpdate('projects', idx, 'url', e.target.value)} /></div>
-                                        <div className="form-group"><label>Language/Tech</label><input type="text" value={proj.language} onChange={e => handleArrayUpdate('projects', idx, 'language', e.target.value)} /></div>
-                                    </div>
-                                </div>
-                            ))}
-                            <button className="btn btn-outline full-width" onClick={() => handleAddItem('projects', { name: 'New Project', description: '', url: '#', language: 'React' })}>
-                                <i className="fas fa-plus"></i> Add Custom Project
-                            </button>
+                                </>
+                            )}
                         </div>
                     )}
 

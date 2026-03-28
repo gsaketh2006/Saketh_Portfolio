@@ -536,7 +536,7 @@ function renderProjects() {
                     </div>
                     <div class="project-bar-actions">
                         ${p.homepage ? `<a href="${p.homepage}" target="_blank" class="project-action-btn primary" onclick="event.stopPropagation()"><i class="fas fa-external-link-alt"></i> Live</a>` : ''}
-                        <a href="${p.url}/blob/HEAD/README.md" target="_blank" class="project-action-btn secondary" onclick="event.stopPropagation()"><i class="fab fa-github"></i> README</a>
+                        <a href="${p.url}" target="_blank" class="project-action-btn secondary" onclick="event.stopPropagation()"><i class="fab fa-github"></i> github</a>
                     </div>
                 </div>
                 ${p.description ? `<p>${p.description}</p>` : ''}
