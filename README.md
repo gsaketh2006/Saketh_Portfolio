@@ -7,30 +7,7 @@ AI/ML-focused Computer Science undergraduate with hands-on experience in buildin
 
 ## 🌐 Live Portfolio
 🔗 **Visit Here:**  
-👉 https://your-portfolio-link.com
-
----
-
-## 🧠 Skills
-
-**Programming:**  
-- Python, C, C++
-
-**Core Concepts:**  
-- Data Structures & Algorithms  
-- Object-Oriented Programming  
-- Operating Systems, Computer Networks  
-
-**AI/ML:**  
-- Machine Learning  
-- Deep Learning  
-- Computer Vision  
-
-**Tools & Frameworks:**  
-- Scikit-learn, TensorFlow, PyTorch  
-- OpenCV  
-- Flask  
-- Git, GitHub  
+👉 https://saketh2006.vercel.app/
 
 ---
 
@@ -71,9 +48,9 @@ AI/ML-focused Computer Science undergraduate with hands-on experience in buildin
 
 ## 📬 Contact
 
-- 📧 Email: your-email@example.com  
-- 💼 LinkedIn: https://linkedin.com/in/yourprofile  
-- 💻 GitHub: https://github.com/yourusername  
+- 📧 Email: guggilamsaketh@gmail.com
+- 💼 LinkedIn: https://www.linkedin.com/in/guggilam-leela-naga-sai-sri-saketh-326853289/
+- 💻 GitHub: https://github.com/gsaketh2006
 
 ---
 
