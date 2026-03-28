@@ -198,7 +198,13 @@ const Admin = ({ data, onSave, onExit }) => {
             const { error: certError } = await supabase
                 .from('certifications')
                 .insert(editedData.certifications.map((cert, i) => ({
-                    ...cert,
+                    title: cert.title || '',
+                    organization: cert.organization || '',
+                    image_url: cert.image || '',
+                    issue_date: cert.issueDate || '',
+                    credential_id: cert.credentialId || '',
+                    credential_url: cert.credentialUrl || '',
+                    color: cert.color || '#FF6A3D',
                     order_index: i
                 })));
             if (certError) throw certError;
@@ -208,7 +214,14 @@ const Admin = ({ data, onSave, onExit }) => {
             if (editedData.projects?.length > 0) {
                 const { error: projError } = await supabase
                     .from('projects')
-                    .insert(editedData.projects.map((p, i) => ({ ...p, order_index: i })));
+                    .insert(editedData.projects.map((p, i) => ({ 
+                        name: p.name || '',
+                        description: p.description || '',
+                        url: p.url || '',
+                        language: p.language || '',
+                        image_url: p.image_url || '',
+                        order_index: i 
+                    })));
                 if (projError) throw projError;
             }
 
