@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { initialData } from './initialData';
 import Admin from './Admin';
 import About from './components/About/About';
+import { supabase } from './lib/supabase';
 
 // --- Animated Counter Hook ---
 // eslint-disable-next-line no-unused-vars
@@ -39,8 +40,18 @@ const useCountUp = (end, duration = 2000, startOnView = true) => {
 
 const App = () => {
     const [data, setData] = useState(() => {
-        const saved = localStorage.getItem('portfolio_data');
-        return saved ? JSON.parse(saved) : initialData;
+        try {
+            const saved = localStorage.getItem('portfolio_data');
+            if (saved && saved !== 'undefined' && saved !== 'null') {
+                const parsed = JSON.parse(saved);
+                if (parsed && typeof parsed === 'object' && parsed.settings) {
+                    return parsed;
+                }
+            }
+        } catch (e) {
+            console.warn('LocalStorage data corrupted, falling back to initialData');
+        }
+        return initialData;
     });
 
     const [theme, setTheme] = useState(() => {
@@ -50,13 +61,88 @@ const App = () => {
     const [scrolled, setScrolled] = useState(false);
     const [activeSection, setActiveSection] = useState('home');
     const [isAdmin, setIsAdmin] = useState(false);
-    const [isLoggingIn, setIsLoggingIn] = useState(false);
+    const [isLoggingIn, setIsLoggingIn] = useState(window.location.pathname.includes('/admin'));
     const [passwordInput, setPasswordInput] = useState('');
     const [loading, setLoading] = useState(true);
 
+    const fetchData = async () => {
+        try {
+            setLoading(true);
+            
+            // 1. Fetch main portfolio data (profile)
+            const { data: profileData, error: profileError } = await supabase
+                .from('portfolio_data')
+                .select('*')
+                .single();
+
+            if (profileError) throw profileError;
+
+            // 2. Fetch experience
+            const { data: expData, error: expError } = await supabase
+                .from('experience')
+                .select('*')
+                .order('order_index', { ascending: true });
+
+            if (expError) throw expError;
+
+            // 3. Fetch certifications
+            const { data: certData, error: certError } = await supabase
+                .from('certifications')
+                .select('*')
+                .order('order_index', { ascending: true });
+
+            if (certError) throw certError;
+
+            // 4. Fetch skills
+            const { data: skillsData, error: skillsError } = await supabase
+                .from('skills')
+                .select('*')
+                .order('order_index', { ascending: true });
+
+            if (skillsError) throw skillsError;
+
+            // 5. Fetch custom projects
+            const { data: projData, error: projError } = await supabase
+                .from('projects')
+                .select('*')
+                .order('order_index', { ascending: true });
+
+            if (projError) throw projError;
+
+            // Reconstruct the skills object from the flat table
+            const skillsMap = {};
+            skillsData.forEach(s => {
+                if (!skillsMap[s.category]) skillsMap[s.category] = [];
+                skillsMap[s.category].push(s.skill_name);
+            });
+
+            // Update main state only if we got valid profile data
+            if (profileData && profileData.settings) {
+                setData({
+                    settings: profileData.settings,
+                    hero: profileData.hero,
+                    about: profileData.about,
+                    contact: profileData.contact,
+                    experience: expData || [],
+                    certifications: certData || [],
+                    projects: projData || [],
+                    skills: skillsMap
+                });
+            }
+
+        } catch (error) {
+            console.error('Supabase Sync Error:', error.message);
+            // Fallback: Use what we have in state (from initialData or localStorage)
+        } finally {
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
-        localStorage.setItem('portfolio_data', JSON.stringify(data));
-    }, [data]);
+        fetchData();
+    }, []);
+
+    // Removed localStorage.setItem('portfolio_data', ...) effect
 
     // Preloader
     useEffect(() => {
@@ -140,7 +226,7 @@ const App = () => {
                 <ParticlesBackground />
                 <div className="hero-spotlight"></div>
                 <ScrollProgress />
-                <SideNav navLinks={data.settings.navLinks} activeSection={activeSection} />
+                {data?.settings?.navLinks && <SideNav navLinks={data.settings.navLinks} activeSection={activeSection} />}
 
                 <AnimatePresence>
                     {isLoggingIn && (
@@ -185,7 +271,7 @@ const App = () => {
                     <Section id="home"><Hero data={data.hero} mousePos={mousePos} /></Section>
                     <Section id="about"><About data={data.about} settings={data.settings} /></Section>
                     <Section id="skills"><Skills data={data.skills} settings={data.settings} /></Section>
-                    <Section id="projects"><Projects settings={data.settings} /></Section>
+                    <Section id="projects"><Projects settings={data.settings} customProjects={data.projects} /></Section>
                     <Section id="experience"><Experience data={data.experience} settings={data.settings} /></Section>
                     <Section id="certifications"><Certifications data={data.certifications} settings={data.settings} /></Section>
                     <Section id="contact"><Contact data={data.contact} settings={data.settings} /></Section>
@@ -612,8 +698,8 @@ const Skills = ({ data, settings }) => {
     );
 };
 
-// --- Projects (GitHub API) ---
-const Projects = ({ settings }) => {
+// --- Projects (GitHub API + Supabase) ---
+const Projects = ({ settings, customProjects = [] }) => {
     const [projects, setProjects] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
@@ -623,20 +709,33 @@ const Projects = ({ settings }) => {
             try {
                 const res = await fetch(`https://api.github.com/users/${settings.githubUsername || 'gsaketh2006'}/repos?sort=updated&per_page=100`);
                 const repos = await res.json();
-                setProjects(repos.filter(r => !r.fork).map(r => ({
+                
+                const githubProjects = repos.filter(r => !r.fork).map(r => ({
                     name: r.name,
                     description: r.description,
                     url: r.html_url,
                     homepage: r.homepage,
                     stars: r.stargazers_count,
                     language: r.language,
-                    topics: r.topics || []
-                })));
-            } catch (e) { console.error(e); }
+                    topics: r.topics || [],
+                    isGitHub: true
+                }));
+
+                // Merge with custom projects from Supabase
+                const merged = [
+                    ...customProjects.map(p => ({ ...p, isGitHub: false })),
+                    ...githubProjects
+                ];
+                
+                setProjects(merged);
+            } catch (e) { 
+                console.error(e);
+                setProjects(customProjects.map(p => ({ ...p, isGitHub: false })));
+            }
             setLoading(false);
         };
         fetchRepos();
-    }, [settings.githubUsername]);
+    }, [settings.githubUsername, customProjects]);
 
     const langColors = {
         Python: '#3572A5', JavaScript: '#f1e05a', TypeScript: '#3178c6', HTML: '#e34c26',
