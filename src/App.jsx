@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { initialData } from './initialData';
 import Admin from './Admin';
-import AboutSection from './components/AboutSection';
+import About from './components/About/About';
 
 // --- Animated Counter Hook ---
 // eslint-disable-next-line no-unused-vars
@@ -43,7 +43,10 @@ const App = () => {
         return saved ? JSON.parse(saved) : initialData;
     });
 
-    const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark');
+    const [theme, setTheme] = useState(() => {
+        const saved = localStorage.getItem('theme');
+        return (saved === 'dark' || saved === 'light') ? saved : 'dark';
+    });
     const [scrolled, setScrolled] = useState(false);
     const [activeSection, setActiveSection] = useState('home');
     const [isAdmin, setIsAdmin] = useState(false);
@@ -180,7 +183,7 @@ const App = () => {
                 />
                 <main>
                     <Section id="home"><Hero data={data.hero} mousePos={mousePos} /></Section>
-                    <Section id="about"><AboutSection data={data.about} settings={data.settings} /></Section>
+                    <Section id="about"><About data={data.about} settings={data.settings} /></Section>
                     <Section id="skills"><Skills data={data.skills} settings={data.settings} /></Section>
                     <Section id="projects"><Projects settings={data.settings} /></Section>
                     <Section id="experience"><Experience data={data.experience} settings={data.settings} /></Section>
@@ -279,10 +282,10 @@ const ParticlesBackground = () => {
                 this.x = Math.random() * canvas.width;
                 this.y = Math.random() * canvas.height;
                 this.size = Math.random() * 2.2 + 0.7;
-                this.vx = (Math.random() - 0.5) * 0.5;
-                this.vy = (Math.random() - 0.5) * 0.5;
+                this.vx = (Math.random() - 0.5) * 0.3; // Slower for breathing effect
+                this.vy = (Math.random() - 0.5) * 0.3;
                 this.opacity = Math.random() * 0.45 + 0.18;
-                this.hue = Math.random() * 40 + 220;
+                this.hue = Math.random() * 20 + 10; // Ember Orange/Amber hue range
             }
             update() {
                 this.x += this.vx; this.y += this.vy;
@@ -292,7 +295,7 @@ const ParticlesBackground = () => {
             draw() {
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fillStyle = `hsla(${this.hue}, 55%, 72%, ${this.opacity})`;
+                ctx.fillStyle = `hsla(${this.hue}, 80%, 55%, ${this.opacity})`;
                 ctx.fill();
             }
         }
@@ -312,7 +315,7 @@ const ParticlesBackground = () => {
                         ctx.beginPath();
                         ctx.moveTo(particles[i].x, particles[i].y);
                         ctx.lineTo(particles[j].x, particles[j].y);
-                        ctx.strokeStyle = `hsla(230, 50%, 68%, ${0.1 * (1 - d / 130)})`;
+                        ctx.strokeStyle = `hsla(20, 70%, 50%, ${0.08 * (1 - d / 130)})`;
                         ctx.lineWidth = 0.7;
                         ctx.stroke();
                     }
@@ -564,12 +567,10 @@ const Skills = ({ data, settings }) => {
     };
 
     const gradients = [
-        'linear-gradient(135deg, #667eea, #764ba2)',
-        'linear-gradient(135deg, #f093fb, #f5576c)',
-        'linear-gradient(135deg, #4facfe, #00f2fe)',
-        'linear-gradient(135deg, #43e97b, #38f9d7)',
-        'linear-gradient(135deg, #fa709a, #fee140)',
-        'linear-gradient(135deg, #a18cd1, #fbc2eb)',
+        'linear-gradient(135deg, #FF6A3D, #0A0A0A)',
+        'linear-gradient(135deg, #0A0A0A, #FF6A3D)',
+        'linear-gradient(135deg, #FFB26B, #141414)',
+        'linear-gradient(135deg, #141414, #FFB26B)',
     ];
 
     return (

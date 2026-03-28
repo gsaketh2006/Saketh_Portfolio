@@ -79,7 +79,7 @@ export const initialData = {
                 "Deployed the solution as a Flask-based web app for real-time screening predictions."
             ],
             icon: "fa-code",
-            color: "#667eea"
+            color: "#FF6A3D"
         }
     ],
     certifications: [
@@ -90,7 +90,7 @@ export const initialData = {
             issueDate: "2024-01-15",
             credentialId: "AWS-CCP-12345",
             credentialUrl: "https://www.credly.com/badges/example",
-            color: "#FF9900"
+            color: "#FF6A3D"
         },
         {
             title: "Google Cloud Professional Cloud Architect",
@@ -99,7 +99,7 @@ export const initialData = {
             issueDate: "2023-11-20",
             credentialId: "GCP-PCA-67890",
             credentialUrl: "https://www.credly.com/badges/example",
-            color: "#4285F4"
+            color: "#FF6A3D"
         },
         {
             title: "Microsoft Azure Fundamentals",
@@ -108,7 +108,7 @@ export const initialData = {
             issueDate: "2023-09-10",
             credentialId: "MS-AZ-900-11111",
             credentialUrl: "https://www.credly.com/badges/example",
-            color: "#0078D4"
+            color: "#FF6A3D"
         }
     ],
     contact: {

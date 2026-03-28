@@ -103,6 +103,7 @@ const AdminAboutPanel = ({ data, settings, onUpdate, onDeepUpdate }) => {
                     </div>
                 )}
             </div>
+
         </div>
     );
 };

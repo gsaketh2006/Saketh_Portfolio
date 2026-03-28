@@ -8,7 +8,7 @@ const GithubContributionGrid = ({ username, theme = 'dark' }) => {
     // For a dark theme, we'll use a nice green/lavender combo if possible, 
     // or just let it use the default which usually looks okay on dark.
     // However, the user asked for consistency with the UI.
-    const chartUrl = `https://ghchart.rshah.org/40c463/${username}`;
+    const chartUrl = `https://ghchart.rshah.org/FF6A3D/${username}`;
 
     return (
         <motion.div
@@ -22,7 +22,7 @@ const GithubContributionGrid = ({ username, theme = 'dark' }) => {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="github-grid-link glass-card"
-                whileHover={{ scale: 1.02, boxShadow: '0 0 20px rgba(102, 126, 234, 0.3)' }}
+                whileHover={{ scale: 1.02, boxShadow: '0 0 20px rgba(255, 106, 61, 0.15)' }}
                 whileTap={{ scale: 0.98 }}
             >
                 <div className="grid-header">

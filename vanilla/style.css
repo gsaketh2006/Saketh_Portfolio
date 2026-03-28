@@ -1,4 +1,4 @@
-﻿/* ===================================================
+/* ===================================================
    SAKETH PORTFOLIO â€” Lavender Blue + Sky Blue Theme
    Natural, Beautiful, Professional
    =================================================== */
@@ -212,6 +212,14 @@ a {
   font-size: 0.85rem;
   position: relative;
   transition: var(--transition);
+  overflow: hidden; /* Ensure image doesn't bleed out */
+}
+
+.nav-logo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
 }
 
 .logo-icon::after {
@@ -416,12 +424,229 @@ a {
   flex: 1;
 }
 
-/* --- Admin Dashboard Layout --- */
-.admin-items-grid {
+/* --- Admin Dashboard Layout Expanded --- */
+.admin-dashboard {
+  min-height: 100vh;
+  background: #0B0F1A !important;
+  color: #ffffff !important;
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-header {
+  padding: 15px 30px;
+  background: var(--bg-glass);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border-glass);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.admin-title h2 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.3rem;
+  font-weight: 700;
+  background: var(--gradient-text);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 2px;
+}
+
+.admin-title p {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.admin-layout {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 20px;
+  grid-template-columns: 240px 1fr;
+  flex: 1;
+}
+
+.admin-sidebar {
+  background: rgba(11, 15, 26, 0.5);
+  border-right: 1px solid var(--border-glass);
+  padding: 25px 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  position: sticky;
+  top: 75px;
+  height: calc(100vh - 75px);
+}
+
+.admin-tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 18px;
+  border-radius: 10px;
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.admin-tab-btn i {
+  width: 18px;
+  text-align: center;
+}
+
+.admin-tab-btn:hover {
+  background: rgba(123, 140, 222, 0.1);
+  color: #ffffff;
+}
+
+.admin-tab-btn.active {
+  background: var(--gradient-main);
+  color: #fff;
+}
+
+.admin-content {
+  padding: 40px;
+  max-width: 900px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.admin-section-header {
+  margin-bottom: 30px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid var(--border-glass);
+}
+
+.admin-section-header h3 {
+  font-size: 1.6rem;
+  font-family: 'Space Grotesk', sans-serif;
+  color: var(--lavender-light);
+}
+
+.form-group {
   margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 8px;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-glass);
+  border-radius: 8px;
+  padding: 12px 15px;
+  color: #fff;
+  font-family: inherit;
+  font-size: 0.95rem;
+  transition: border-color 0.3s;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  border-color: var(--lavender);
+  outline: none;
+}
+
+.admin-item-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border-glass);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.admin-item-card:hover {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.admin-card-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.btn-add-item {
+  width: 100%;
+  padding: 15px;
+  background: transparent;
+  border: 1px dashed var(--border-color);
+  border-radius: 12px;
+  color: var(--lavender-light);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-weight: 500;
+  transition: 0.3s;
+  margin-top: 10px;
+}
+
+.btn-add-item:hover {
+  background: rgba(123, 140, 222, 0.05);
+  border-color: var(--lavender);
+}
+
+.admin-loading-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10001;
+  color: #fff;
+  font-size: 1.2rem;
+  font-weight: 600;
+  gap: 15px;
+}
+
+.admin-loading-spinner {
+  width: 30px;
+  height: 30px;
+  border: 3px solid rgba(255, 255, 255, 0.1);
+  border-top-color: var(--lavender);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 900px) {
+  .admin-layout {
+    grid-template-columns: 1fr;
+  }
+  .admin-sidebar {
+    position: relative;
+    top: 0;
+    height: auto;
+    flex-direction: row;
+    overflow-x: auto;
+    padding: 15px;
+  }
+  .admin-tab-btn {
+    padding: 10px 15px;
+    white-space: nowrap;
+  }
 }
 
 .form-grid {
@@ -1191,13 +1416,13 @@ a {
 
 .hero-avatar-wrap {
   position: relative;
-  width: 320px;
-  height: 320px;
+  width: 180px;
+  height: 180px;
 }
 
 .avatar-glow {
   position: absolute;
-  inset: -36px;
+  inset: -20px;
   border-radius: 50%;
   background: radial-gradient(circle, rgba(123, 140, 222, 0.22), transparent 70%);
   animation: glowPulse 4s ease-in-out infinite;
@@ -1220,7 +1445,7 @@ a {
 
 .avatar-ring {
   position: absolute;
-  inset: -18px;
+  inset: -10px;
   border-radius: 50%;
   border: 2px solid transparent;
   background: var(--gradient-main) border-box;
@@ -1261,7 +1486,7 @@ a {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 7rem;
+  font-size: 4.5rem;
   color: var(--lavender);
   position: relative;
   z-index: 1;
@@ -3278,71 +3503,8 @@ h4 {
    NEW COMPONENTS STYLING (REFINED BENTO)
    =================================================== */
 
-/* ---- GITHUB & LEETCODE GRID ITEMS ---- */
-.github-contribution-grid,
-.leetcode-contribution-grid {
-  width: 100%;
-}
-
-.github-grid-link,
-.leetcode-grid-link {
-  display: block;
-  padding: 24px;
-  width: 100%;
-  text-decoration: none;
-  transition: var(--transition);
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-}
-
-.grid-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 20px;
-  color: var(--text-primary);
-  font-weight: 600;
-  font-size: 1.1rem;
-}
-
-.grid-header i {
-  color: var(--lavender);
-  font-size: 1.4rem;
-}
-
-.grid-image-container {
-  overflow-x: auto;
-  border-radius: 12px;
-  background: rgba(0, 0, 0, 0.25);
-  padding: 20px;
-  border: 1px solid var(--border-glass);
-  flex-grow: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.github-grid-img,
-.leetcode-grid-img {
-  max-width: 100%;
-  height: auto;
-  display: block;
-  margin: 0 auto;
-  filter: saturate(1.1) brightness(1.2) hue-rotate(-10deg);
-}
-
-.leetcode-grid-img {
-  filter: contrast(1.1) brightness(1.1);
-}
-
-.grid-footer {
-  margin-top: 15px;
-  text-align: right;
-  font-size: 0.85rem;
-  color: var(--text-muted);
-  font-weight: 500;
-}
+/* ---- GITHUB & LEETCODE BARS (REPLACED GRIDS) ---- */
+/* using global .project-bar classes instead */
 
 /* ---- ADMIN ABOUT PANEL ENHANCEMENTS ---- */
 .admin-integration-box {
@@ -3443,175 +3605,185 @@ h4 {
 
 
 /* ===================================================
-   ENHANCED ABOUT SECTION (BENTO GRID)
+   ENHANCED ABOUT SECTION (GLASS CANVAS)
    =================================================== */
 
-.about-bento-grid {
-  display: grid;
-  grid-template-columns: 1.5fr 1fr;
-  grid-template-rows: auto auto;
-  gap: 24px;
-  max-width: 1100px;
-  margin: 40px auto;
+.about-container {
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
-/* Base Bento Card */
-.bento-card {
+.about-canvas-wrapper {
+  max-width: 1100px;
+  margin: 40px auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.glass-canvas-card {
   position: relative;
   overflow: hidden;
-  padding: 32px;
+  padding: 48px;
   border-radius: 24px;
   background: var(--bg-card);
   backdrop-filter: blur(14px) saturate(150%);
   -webkit-backdrop-filter: blur(14px) saturate(150%);
   border: 1px solid var(--border-glass);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
   transition: all 0.4s cubic-bezier(0.2, 0, 0, 1);
-  display: flex;
-  flex-direction: column;
 }
 
-.bento-card:hover {
-  transform: translateY(-5px);
-  border-color: rgba(123, 140, 222, 0.4);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
-}
-
-/* Card Accent Glow */
-.bento-accent-glow {
+.canvas-glow {
   position: absolute;
-  top: -50px;
-  right: -50px;
-  width: 150px;
-  height: 150px;
-  background: radial-gradient(circle, var(--lavender-glass) 0%, transparent 70%);
+  top: -100px;
+  right: -100px;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, var(--lavender-glass) 0%, transparent 60%);
   opacity: 0.15;
   pointer-events: none;
-  transition: opacity 0.4s ease;
 }
 
-.bento-card:hover .bento-accent-glow {
-  opacity: 0.3;
-}
-
-/* Icon Badges */
-.bento-icon-badge {
-  width: 48px;
-  height: 48px;
-  background: var(--gradient-main);
-  border-radius: 14px;
+.canvas-content {
+  position: relative;
+  z-index: 2;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 24px;
-  font-size: 1.3rem;
-  color: #fff;
-  box-shadow: 0 8px 20px rgba(123, 140, 222, 0.3);
+  flex-direction: column;
+  gap: 20px;
 }
 
-/* Typography Hierarchy */
-.bento-subtitle {
+/* Header row with Status Pill */
+.canvas-top-area {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.canvas-subtitle {
   font-family: 'Space Grotesk', sans-serif;
   text-transform: uppercase;
-  font-size: 0.75rem;
+  font-size: 0.85rem;
   letter-spacing: 2.5px;
   color: var(--lavender);
   font-weight: 700;
   display: block;
-  margin-bottom: 6px;
 }
 
-.bento-header h3 {
-  font-size: 1.75rem;
+.canvas-title {
+  font-size: 2.2rem;
   font-weight: 800;
-  margin-bottom: 16px;
   color: var(--text-primary);
   background: linear-gradient(135deg, #fff 0%, var(--lavender) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
+  line-height: 1.2;
 }
 
-.bento-description {
-  font-size: 1.1rem;
-  line-height: 1.7;
-  color: var(--text-secondary);
-  margin-top: auto;
-}
-
-/* Role Card Specifics */
-.bento-about-role {
-  background: linear-gradient(165deg, rgba(255, 255, 255, 0.03) 0%, rgba(0, 0, 0, 0) 100%);
-}
-
-.role-credential {
-  display: flex;
-  gap: 16px;
-  margin-top: 20px;
-  padding: 16px;
-  background: rgba(255, 255, 255, 0.03);
-  border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.role-accent-line {
-  width: 4px;
-  background: var(--gradient-main);
-  border-radius: 20px;
-}
-
-.role-main h4 {
+.canvas-description {
   font-size: 1.15rem;
-  font-weight: 700;
-  margin-bottom: 4px;
-  color: #fff;
+  line-height: 1.8;
+  color: var(--text-secondary);
+  max-width: 850px;
+  margin-top: 10px;
 }
 
-.role-main p {
-  font-size: 0.95rem;
+/* The Live Status Badge */
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: rgba(123, 140, 222, 0.08);
+  border: 1px solid rgba(123, 140, 222, 0.2);
+  border-radius: 50px;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  white-space: nowrap;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--mint);
+  border-radius: 50%;
+  box-shadow: 0 0 10px var(--mint);
+  animation: pulse-dot 2s infinite;
+}
+
+.status-role {
+  font-weight: 600;
+}
+
+.status-at {
   color: var(--text-muted);
-  font-weight: 500;
 }
 
-/* Submissions Container */
+.status-org {
+  color: var(--lavender-light);
+  font-weight: 600;
+}
+
+@keyframes pulse-dot {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(129, 230, 217, 0.7); }
+  70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(129, 230, 217, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(129, 230, 217, 0); }
+}
+
+/* Submissions Container (now styling the wrapper for the new project bars) */
 .bento-submissions-container {
-  grid-column: 1 / -1;
   width: 100%;
 }
 
-/* MOBILE REFINEMENT */
-@media (max-width: 992px) {
-  .about-bento-grid {
-    grid-template-columns: 1fr;
-    padding: 0 20px;
-  }
+.grids-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 20px;
 }
 
+/* MOBILE REFINEMENT FOR CANVAS */
 @media (max-width: 768px) {
-  .bento-card {
-    padding: 24px;
+  .about-canvas-wrapper {
+    padding: 0 16px;
+  }
+  .glass-canvas-card {
+    padding: 32px 24px;
     border-radius: 20px;
   }
-
-  .bento-header h3 {
-    font-size: 1.5rem;
+  .canvas-title {
+    font-size: 1.8rem;
   }
-
-  .bento-description {
-    font-size: 1rem;
+  .canvas-description {
+    font-size: 1.05rem;
+    line-height: 1.7;
   }
-
-  .grids-container.side-by-side {
-    gap: 16px;
+  .canvas-top-area {
+    gap: 12px;
+  }
+  .grids-container {
+    grid-template-columns: 1fr;
   }
 }
 
 @media (max-width: 480px) {
-  .bento-header h3 {
-    font-size: 1.35rem;
+  .about-canvas-wrapper {
+    padding: 0 12px;
   }
-
-  .role-credential {
-    padding: 12px;
+  .glass-canvas-card {
+    padding: 24px 20px;
+  }
+  .canvas-title {
+    font-size: 1.6rem;
+  }
+  .status-pill {
+    font-size: 0.85rem;
+    padding: 6px 14px;
+    white-space: normal;
+    line-height: 1.4;
   }
 }
 

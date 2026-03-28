@@ -1,7 +1,4 @@
-/**
- * Saketh - Portfolio Website (Vanilla JS Version)
- * Ported from React to Vanilla HTML/CSS/JS
- */
+import { supabase } from './supabase.js';
 
 const initialData = {
     settings: {
@@ -54,7 +51,7 @@ const initialData = {
             { url: "mailto:guggilamsaketh@gmail.com", icon: "fas fa-envelope", label: "Email" }
         ],
         resumeUrl: "",
-        avatarImage: ""
+        avatarImage: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=200&h=200&auto=format&fit=crop"
     },
     about: {
         title: "About Me",
@@ -134,7 +131,7 @@ const initialData = {
 
 // --- State Management ---
 let state = {
-    data: JSON.parse(localStorage.getItem('portfolio_data')) || initialData,
+    data: initialData, // We will override this from Supabase
     theme: localStorage.getItem('theme') || 'dark',
     activeSection: 'home',
     navOpen: false,
@@ -142,12 +139,24 @@ let state = {
     mousePos: { x: 0, y: 0 },
     projects: [],
     loadingProjects: true,
-    searchTerm: ''
+    searchTerm: '',
+    session: null,
+    activeTab: 'hero', // New for CMS
+    isAdmin: false
 };
 
 // --- Initialization ---
-function init() {
+async function init() {
     applyTheme();
+    
+    // Check for existing session
+    const { data: { session } } = await supabase.auth.getSession();
+    state.session = session;
+    state.isAdmin = !!session;
+
+    // Fetch data from Supabase
+    await fetchPortfolioData();
+
     renderAll();
     setupEventListeners();
     initParticles();
@@ -160,6 +169,28 @@ function init() {
         document.getElementById('preloader')?.classList.add('fade-out');
     }, 1500);
 }
+
+async function fetchPortfolioData() {
+    try {
+        const { data, error } = await supabase
+            .from('portfolio_data')
+            .select('content')
+            .single();
+
+        if (error) {
+            console.warn('Could not fetch data from Supabase, using initial data:', error.message);
+            return;
+        }
+
+        if (data && data.content) {
+            state.data = data.content;
+            console.log('Successfully loaded data from Supabase');
+        }
+    } catch (err) {
+        console.error('Error fetching from Supabase:', err);
+    }
+}
+
 
 // --- Render All ---
 function renderAll() {
@@ -194,7 +225,15 @@ function renderNavbar() {
     const desktopMenu = document.getElementById('nav-menu-desktop');
     const mobileMenu = document.getElementById('nav-menu-mobile');
     const logoText = document.getElementById('logo-text');
+    const logoIconContainer = document.getElementById('logo-icon-container');
+    
     logoText.textContent = state.data.settings.logoText;
+    
+    if (state.data.hero.avatarImage) {
+        logoIconContainer.innerHTML = `<img src="${state.data.hero.avatarImage}" class="nav-logo-img" alt="Logo">`;
+    } else {
+        logoIconContainer.innerHTML = `<i class="fas fa-terminal"></i>`;
+    }
 
     const linksHtml = state.data.settings.navLinks.map(link => `
         <a href="${link.href}" class="nav-link ${state.activeSection === link.section ? 'active' : ''}" data-section="${link.section}">
@@ -296,37 +335,41 @@ function renderAbout() {
     document.getElementById('about-title-text').textContent = s.sectionTitles?.about || "About Me";
     document.getElementById('about-display-title').textContent = d.title;
     document.getElementById('about-description').textContent = d.description;
-    document.getElementById('current-role-title').textContent = d.currentRoleTitle;
-    document.getElementById('current-role-org').textContent = d.currentRoleOrg;
+    document.getElementById('current-role-title').textContent = state.data.about.currentRoleTitle;
+    document.getElementById('current-role-org').textContent = state.data.about.currentRoleOrg;
 
     const gridsContainer = document.getElementById('contribution-grids');
     gridsContainer.innerHTML = '';
     if (d.showGithubGrid) {
         gridsContainer.innerHTML += `
-            <div class="grid-item">
-                <div class="github-contribution-grid">
-                    <a href="https://github.com/${s.githubUsername}" target="_blank" class="github-grid-link glass-card">
-                        <div class="grid-header"><i class="fab fa-github"></i><span>GitHub Contributions</span></div>
-                        <div class="grid-image-container">
-                            <img src="https://ghchart.rshah.org/40c463/${s.githubUsername}" alt="GitHub" class="github-grid-img" loading="lazy">
+            <div class="project-bar glass-card" onclick="window.open('https://github.com/${s.githubUsername}', '_blank')">
+                <div class="project-bar-body">
+                    <div class="project-bar-top">
+                        <div class="project-bar-title">
+                            <h3><i class="fab fa-github" style="color: var(--lavender); margin-right: 8px;"></i>GitHub Contributions</h3>
                         </div>
-                        <div class="grid-footer"><span>Click to view profile</span></div>
-                    </a>
+                    </div>
+                    <p class="project-bar-desc">Explore my complete open-source activity, latest repositories, and daily commits.</p>
+                </div>
+                <div class="project-bar-arrow">
+                    <i class="fas fa-arrow-right"></i>
                 </div>
             </div>
         `;
     }
     if (d.showLeetcodeGrid) {
         gridsContainer.innerHTML += `
-            <div class="grid-item">
-                <div class="leetcode-contribution-grid">
-                    <a href="https://leetcode.com/${s.leetcodeUsername}" target="_blank" class="leetcode-grid-link glass-card">
-                        <div class="grid-header"><i class="fas fa-code"></i><span>LeetCode Submissions</span></div>
-                        <div class="grid-image-container">
-                            <img src="https://leetcode-stats-card.vercel.app/?username=${s.leetcodeUsername}&theme=dark" alt="LeetCode" class="leetcode-grid-img" loading="lazy">
+            <div class="project-bar glass-card" onclick="window.open('https://leetcode.com/${s.leetcodeUsername}', '_blank')">
+                <div class="project-bar-body">
+                    <div class="project-bar-top">
+                        <div class="project-bar-title">
+                            <h3><i class="fas fa-code" style="color: var(--sky); margin-right: 8px;"></i>LeetCode Submissions</h3>
                         </div>
-                        <div class="grid-footer"><span>Click to view profile</span></div>
-                    </a>
+                    </div>
+                    <p class="project-bar-desc">View my competitive programming progress, solved problems, and algorithm solutions.</p>
+                </div>
+                <div class="project-bar-arrow">
+                    <i class="fas fa-arrow-right"></i>
                 </div>
             </div>
         `;
@@ -597,22 +640,92 @@ function setupEventListeners() {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     });
 
-    // Admin
+    // Admin Forms
+    const loginForm = document.getElementById('admin-login-form');
+    const otpForm = document.getElementById('admin-otp-form');
+    const otpBack = document.getElementById('admin-otp-back');
+    const otpResend = document.getElementById('admin-otp-resend');
+
     document.getElementById('admin-trigger').addEventListener('click', () => {
         document.getElementById('admin-login-overlay').style.display = 'flex';
+        // Reset view
+        loginForm.style.display = 'block';
+        otpForm.style.display = 'none';
     });
+    
     document.getElementById('admin-cancel').addEventListener('click', () => {
         document.getElementById('admin-login-overlay').style.display = 'none';
     });
-    document.getElementById('admin-login-form').addEventListener('submit', (e) => {
+
+    // Step 1: Submit Password
+    loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const pass = document.getElementById('admin-password').value;
-        if (pass === 'Port@26') {
+        const email = document.getElementById('admin-email').value;
+        const password = document.getElementById('admin-password').value;
+        
+        try {
+            // First verify password
+            const { data, error } = await supabase.auth.signInWithPassword({
+                email,
+                password
+            });
+
+            if (error) throw error;
+            
+            // On success, trigger OTP to same email
+            const { error: otpError } = await supabase.auth.signInWithOtp({ 
+                email,
+                options: { shouldCreateUser: false } 
+            });
+
+            if (otpError) throw otpError;
+
+            // Show OTP form, hide login
+            loginForm.style.display = 'none';
+            otpForm.style.display = 'block';
+            console.log('OTP sent to ' + email);
+        } catch (error) {
+            alert('Verification failed: ' + error.message);
+        }
+    });
+
+    // Step 2: Submit OTP
+    otpForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('admin-email').value;
+        const token = document.getElementById('admin-otp').value;
+
+        try {
+            const { data, error } = await supabase.auth.verifyOtp({
+                email,
+                token,
+                type: 'email'
+            });
+
+            if (error) throw error;
+
+            state.session = data.session;
             state.isAdmin = true;
             document.getElementById('admin-login-overlay').style.display = 'none';
             renderAdminDashboard();
-        } else {
-            alert('Incorrect password');
+        } catch (error) {
+            alert('Invalid OTP: ' + error.message);
+        }
+    });
+
+    otpBack.addEventListener('click', () => {
+        loginForm.style.display = 'block';
+        otpForm.style.display = 'none';
+    });
+
+    otpResend.addEventListener('click', async () => {
+        const email = document.getElementById('admin-email').value;
+        try {
+            const { error } = await supabase.auth.signInWithOtp({ email });
+            if (error) throw error;
+            alert('A new code has been sent.');
+        } catch (error) {
+            alert('Error resending: ' + error.message);
         }
     });
 }
@@ -751,48 +864,345 @@ function initParticles() {
     animate();
 }
 
-// --- Admin Dashboard (Simplified Simulation) ---
+// --- Admin CMS Implementation ---
+
 function renderAdminDashboard() {
     const container = document.getElementById('admin-dashboard-container');
     container.innerHTML = `
         <div class="admin-dashboard-overlay">
-            <div class="admin-dashboard glass-card">
+            <div class="admin-dashboard">
                 <header class="admin-header">
-                    <h2>Admin Dashboard</h2>
+                    <div class="admin-title">
+                        <h2>Admin Dashboard</h2>
+                        <p id="admin-last-saved">Manage your portfolio content in real-time.</p>
+                    </div>
                     <div class="admin-controls">
-                        <button id="admin-save" class="btn btn-primary">Save Changes</button>
-                        <button id="admin-exit" class="btn btn-outline">Exit</button>
+                        <button id="admin-save-all" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Save All Changes
+                        </button>
+                        <button id="admin-logout" class="btn btn-outline">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </button>
                     </div>
                 </header>
-                <div class="admin-notice">Note: In this vanilla version, "Save" updates localStorage. In a real app, it would hit an API.</div>
-                <div class="admin-form-container">
-                    <div class="form-group">
-                        <label>Site Name</label>
-                        <input type="text" id="edit-site-name" value="${state.data.settings.siteName}">
-                    </div>
-                    <div class="form-group">
-                        <label>Hero Role</label>
-                        <input type="text" id="edit-hero-role" value="${state.data.settings.siteTitle}">
-                    </div>
-                    <!-- Add more fields as needed -->
-                     <p style="margin-top:20px; color:var(--text-muted)">Full CRUD logic can be added here similarly to React. All rendering logic is already generic.</p>
+
+                <div class="admin-layout">
+                    <aside class="admin-sidebar">
+                        ${renderTabBtn('hero', 'fa-home', 'Hero Section')}
+                        ${renderTabBtn('about', 'fa-user', 'About Me')}
+                        ${renderTabBtn('skills', 'fa-tools', 'Skills')}
+                        ${renderTabBtn('projects', 'fa-code', 'Manual Projects')}
+                        ${renderTabBtn('experience', 'fa-briefcase', 'Experience')}
+                        ${renderTabBtn('certifications', 'fa-certificate', 'Certifications')}
+                        ${renderTabBtn('contact', 'fa-envelope', 'Contact')}
+                        ${renderTabBtn('settings', 'fa-cog', 'Site Settings')}
+                    </aside>
+
+                    <main class="admin-content" id="admin-tab-content">
+                        <!-- Dynamic content based on tab -->
+                    </main>
                 </div>
             </div>
         </div>
     `;
 
-    document.getElementById('admin-exit').addEventListener('click', () => {
-        container.innerHTML = '';
-        state.isAdmin = false;
+    // Initialize the active tab
+    switchTab(state.activeTab);
+
+    // Sidebar click events
+    document.querySelectorAll('.admin-tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => switchTab(btn.dataset.tab));
     });
 
-    document.getElementById('admin-save').addEventListener('click', () => {
-        state.data.settings.siteName = document.getElementById('edit-site-name').value;
-        state.data.settings.siteTitle = document.getElementById('edit-hero-role').value;
-        localStorage.setItem('portfolio_data', JSON.stringify(state.data));
-        renderAll();
-        alert('Saved to local storage!');
+    // Header buttons
+    document.getElementById('admin-save-all').onclick = saveAllChanges;
+    document.getElementById('admin-logout').onclick = async () => {
+        await supabase.auth.signOut();
+        location.reload();
+    };
+}
+
+function renderTabBtn(id, icon, label) {
+    const active = state.activeTab === id ? 'active' : '';
+    return `<button class="admin-tab-btn ${active}" data-tab="${id}"><i class="fas ${icon}"></i> <span>${label}</span></button>`;
+}
+
+function switchTab(tabId) {
+    state.activeTab = tabId;
+    document.querySelectorAll('.admin-tab-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.tab === tabId);
     });
+
+    const contentArea = document.getElementById('admin-tab-content');
+    
+    switch(tabId) {
+        case 'hero': renderHeroTab(contentArea); break;
+        case 'about': renderAboutTab(contentArea); break;
+        case 'skills': renderSkillsTab(contentArea); break;
+        case 'experience': renderExperienceTab(contentArea); break;
+        case 'certifications': renderCertificationsTab(contentArea); break;
+        case 'contact': renderContactTab(contentArea); break;
+        case 'settings': renderSettingsTab(contentArea); break;
+        case 'projects': contentArea.innerHTML = `<div class="admin-section"><h3>Project Management</h3><p>GitHub projects are automatically synced. Manual overrides can be implemented here.</p></div>`; break;
+    }
+}
+
+// --- Specific Tab Renderers ---
+
+function renderHeroTab(parent) {
+    const d = state.data.hero;
+    parent.innerHTML = `
+        <div class="admin-section">
+            <div class="admin-section-header"><h3>Hero Customization</h3></div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Greeting</label>
+                    <input type="text" data-path="hero.greeting" value="${d.greeting}">
+                </div>
+                <div class="form-group">
+                    <label>Primary Role</label>
+                    <input type="text" data-path="hero.role" value="${d.role}">
+                </div>
+                <div class="form-group" style="grid-column: span 2">
+                    <label>Brief Description</label>
+                    <textarea data-path="hero.description" rows="3">${d.description}</textarea>
+                </div>
+                <div class="form-group">
+                    <label>Badge Text</label>
+                    <input type="text" data-path="hero.badgeText" value="${d.badgeText}">
+                </div>
+                <div class="form-group">
+                    <label>Avatar/Profile Image URL</label>
+                    <input type="text" data-path="hero.avatarImage" value="${d.avatarImage}">
+                </div>
+            </div>
+            
+            <div class="admin-section-header"><h4>Typing Animation Strings</h4></div>
+            <div id="typing-string-container" class="admin-items-grid">
+                ${d.typingTexts.map((txt, i) => `
+                    <div class="form-group">
+                        <input type="text" class="typing-text-input" value="${txt}" data-idx="${i}">
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+    `;
+    bindAdminInputs(parent);
+    
+    // Auto-update typing strings on change
+    parent.querySelectorAll('.typing-text-input').forEach(input => {
+        input.oninput = (e) => {
+            state.data.hero.typingTexts[e.target.dataset.idx] = e.target.value;
+        };
+    });
+}
+
+function renderAboutTab(parent) {
+    const d = state.data.about;
+    parent.innerHTML = `
+        <div class="admin-section">
+            <div class="admin-section-header"><h3>About Me</h3></div>
+            <div class="form-group">
+                <label>Main Title</label>
+                <input type="text" data-path="about.title" value="${d.title}">
+            </div>
+            <div class="form-group">
+                <label>Detailed Bio</label>
+                <textarea data-path="about.description" rows="6">${d.description}</textarea>
+            </div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Current Role Title</label>
+                    <input type="text" data-path="about.currentRoleTitle" value="${d.currentRoleTitle}">
+                </div>
+                <div class="form-group">
+                    <label>Current Org</label>
+                    <input type="text" data-path="about.currentRoleOrg" value="${d.currentRoleOrg}">
+                </div>
+            </div>
+        </div>
+    `;
+    bindAdminInputs(parent);
+}
+
+function renderSkillsTab(parent) {
+    const d = state.data.skills;
+    parent.innerHTML = `
+        <div class="admin-section">
+            <div class="admin-section-header"><h3>Skills Management</h3></div>
+            <p style="margin-bottom: 20px; font-size: 0.9rem; color: var(--text-muted)">Edit groups by clicking the values (comma separated).</p>
+            <div class="admin-items-grid">
+                ${Object.entries(d).map(([cat, list]) => `
+                    <div class="admin-item-card">
+                        <div class="form-group">
+                            <label>${cat}</label>
+                            <textarea class="skill-list-edit" data-cat="${cat}">${list.join(', ')}</textarea>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+    `;
+    parent.querySelectorAll('.skill-list-edit').forEach(area => {
+        area.onchange = (e) => {
+            state.data.skills[e.target.dataset.cat] = e.target.value.split(',').map(s => s.trim()).filter(Boolean);
+        };
+    });
+}
+
+function renderExperienceTab(parent) {
+    parent.innerHTML = `
+        <div class="admin-section">
+            <div class="admin-section-header"><h3>Work History</h3></div>
+            <div id="experience-list-admin"></div>
+            <button id="add-experience" class="btn-add-item"><i class="fas fa-plus"></i> Add New Experience</button>
+        </div>
+    `;
+
+    const renderList = () => {
+        const listDiv = document.getElementById('experience-list-admin');
+        listDiv.innerHTML = state.data.experience.map((exp, i) => `
+            <div class="admin-item-card">
+                <div class="card-header-admin">
+                    <input type="text" class="input-bold" value="${exp.title}" oninput="state.data.experience[${i}].title = this.value">
+                    <button class="btn-delete-small" onclick="state.data.experience.splice(${i}, 1); document.getElementById('experience-tab-trigger').click();"><i class="fas fa-trash"></i></button>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group"><label>Company</label><input type="text" value="${exp.company}" oninput="state.data.experience[${i}].company = this.value"></div>
+                    <div class="form-group"><label>Date Range</label><input type="text" value="${exp.date}" oninput="state.data.experience[${i}].date = this.value"></div>
+                    <div class="form-group" style="grid-column: span 2"><label>Description</label><textarea rows="2" oninput="state.data.experience[${i}].description = this.value">${exp.description}</textarea></div>
+                    <div class="form-group"><label>Icon (FontAwesome)</label><input type="text" value="${exp.icon}" oninput="state.data.experience[${i}].icon = this.value"></div>
+                    <div class="form-group"><label>Accent Color (Hex)</label><input type="color" value="${exp.color}" oninput="state.data.experience[${i}].color = this.value"></div>
+                </div>
+            </div>
+        `).join('');
+    };
+
+    renderList();
+    document.getElementById('add-experience').onclick = () => {
+        state.data.experience.unshift({
+            title: "New Role", company: "Organization", date: "Jan 2025 - Present", 
+            description: "Describe your impact here...", icon: "fa-code", color: "#667eea"
+        });
+        switchTab('experience');
+    };
+}
+
+function renderCertificationsTab(parent) {
+    parent.innerHTML = `
+        <div class="admin-section">
+            <div class="admin-section-header"><h3>Certifications</h3></div>
+            <div id="certs-list-admin" class="admin-items-grid"></div>
+            <button id="add-cert" class="btn-add-item"><i class="fas fa-plus"></i> Add New Certification</button>
+        </div>
+    `;
+
+    const renderList = () => {
+        const listDiv = document.getElementById('certs-list-admin');
+        listDiv.innerHTML = state.data.certifications.map((cert, i) => `
+            <div class="admin-item-card">
+                <div class="card-header-admin">
+                    <h4 style="margin:0">${cert.title}</h4>
+                    <button class="btn-delete-small" onclick="state.data.certifications.splice(${i}, 1); switchTab('certifications');"><i class="fas fa-trash"></i></button>
+                </div>
+                <div class="form-group"><label>Credential Title</label><input type="text" value="${cert.title}" oninput="state.data.certifications[${i}].title = this.value"></div>
+                <div class="form-group"><label>Organization</label><input type="text" value="${cert.organization}" oninput="state.data.certifications[${i}].organization = this.value"></div>
+                <div class="form-group"><label>Credential URL</label><input type="text" value="${cert.credentialUrl}" oninput="state.data.certifications[${i}].credentialUrl = this.value"></div>
+                <div class="form-group"><label>Badge Image URL</label><input type="text" value="${cert.image}" oninput="state.data.certifications[${i}].image = this.value"></div>
+            </div>
+        `).join('');
+    };
+    renderList();
+    document.getElementById('add-cert').onclick = () => {
+        state.data.certifications.unshift({
+            title: "Certification Title", organization: "Issuer", image: "", 
+            issueDate: "2025-01-01", credentialUrl: "", color: "#667eea"
+        });
+        switchTab('certifications');
+    };
+}
+
+function renderContactTab(parent) {
+    const d = state.data.contact;
+    parent.innerHTML = `
+        <div class="admin-section">
+            <div class="admin-section-header"><h3>Contact & Socials</h3></div>
+            <div class="form-grid">
+                <div class="form-group"><label>Location</label><input type="text" data-path="contact.location.value" value="${d.location.value}"></div>
+                <div class="form-group"><label>Email Address</label><input type="text" data-path="contact.email.value" value="${d.email.value}"></div>
+                <div class="form-group"><label>Phone Number</label><input type="text" data-path="contact.phone.value" value="${d.phone.value}"></div>
+            </div>
+        </div>
+    `;
+    bindAdminInputs(parent);
+}
+
+function renderSettingsTab(parent) {
+    const d = state.data.settings;
+    parent.innerHTML = `
+        <div class="admin-section">
+            <div class="admin-section-header"><h3>Site Configuration</h3></div>
+            <div class="form-grid">
+                <div class="form-group"><label>Site Name</label><input type="text" data-path="settings.siteName" value="${d.siteName}"></div>
+                <div class="form-group"><label>Logo Text</label><input type="text" data-path="settings.logoText" value="${d.logoText}"></div>
+                <div class="form-group"><label>GitHub Username</label><input type="text" data-path="settings.githubUsername" value="${d.githubUsername}"></div>
+                <div class="form-group"><label>LeetCode Username</label><input type="text" data-path="settings.leetcodeUsername" value="${d.leetcodeUsername}"></div>
+            </div>
+        </div>
+    `;
+    bindAdminInputs(parent);
+}
+
+// --- CMS Logic Helpers ---
+
+function bindAdminInputs(parent) {
+    parent.querySelectorAll('[data-path]').forEach(input => {
+        input.oninput = (e) => {
+            const path = e.target.dataset.path.split('.');
+            let current = state.data;
+            for (let i = 0; i < path.length - 1; i++) {
+                current = current[path[i]];
+            }
+            current[path[path.length - 1]] = e.target.value;
+        };
+    });
+}
+
+async function saveAllChanges() {
+    const btn = document.getElementById('admin-save-all');
+    const status = document.getElementById('admin-last-saved');
+    
+    // Add loading overlay
+    const overlay = document.createElement('div');
+    overlay.className = 'admin-loading-overlay';
+    overlay.innerHTML = `<div class="admin-loading-spinner"></div><span>Syncing to Supabase...</span>`;
+    document.body.appendChild(overlay);
+
+    try {
+        const { error } = await supabase
+            .from('portfolio_data')
+            .upsert({ 
+                user_id: state.session.user.id,
+                content: state.data,
+                updated_at: new Date().toISOString()
+            }, { onConflict: 'user_id' });
+
+        if (error) throw error;
+        
+        status.textContent = 'Last saved: ' + new Date().toLocaleTimeString();
+        status.style.color = '#4ade80';
+        
+        // Refresh the public-facing components
+        renderAll();
+        
+        setTimeout(() => {
+            status.style.color = '';
+        }, 3000);
+    } catch (error) {
+        alert('Failed to save changes: ' + error.message);
+    } finally {
+        overlay.remove();
+    }
 }
 
 // Run on load

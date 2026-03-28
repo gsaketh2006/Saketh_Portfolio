@@ -67,7 +67,9 @@
             <div id="nav-overlay" class="nav-overlay"></div>
             <div class="nav-container">
                 <a href="#home" class="nav-logo">
-                    <div class="logo-icon"><i class="fas fa-terminal"></i></div>
+                    <div id="logo-icon-container" class="logo-icon">
+                        <i class="fas fa-terminal"></i>
+                    </div>
                     <span id="logo-text">Saketh</span>
                 </a>
 
@@ -133,40 +135,32 @@
 
             <!-- About Section -->
             <section id="about" class="section reveal">
-                <div class="container">
+                <div class="container about-container">
                     <h2 class="section-heading">
                         <span class="heading-num">01.</span>
                         <span id="about-title-text">About Me</span>
                         <span class="heading-line"></span>
                     </h2>
-                    <div class="about-bento-grid">
-                        <div class="bento-card bento-about-main glass-card">
-                            <div class="bento-accent-glow"></div>
-                            <div class="bento-content-wrapper">
-                                <div class="bento-icon-badge"><i class="fas fa-user-astronaut"></i></div>
-                                <div class="bento-header">
-                                    <span class="bento-subtitle">The Story</span>
-                                    <h3 id="about-display-title"></h3>
+                    <div class="about-canvas-wrapper">
+                        <div class="glass-canvas-card">
+                            <div class="canvas-glow"></div>
+                            <div class="canvas-content">
+                                <div class="canvas-top-area">
+                                    <span class="canvas-subtitle">The Story</span>
+                                    <div class="status-pill">
+                                        <span class="status-dot"></span>
+                                        <span id="current-role-title" class="status-role"></span>
+                                        <span class="status-at">at</span>
+                                        <span id="current-role-org" class="status-org"></span>
+                                    </div>
                                 </div>
-                                <p id="about-description" class="bento-description"></p>
+                                <h3 id="about-display-title" class="canvas-title"></h3>
+                                <p id="about-description" class="canvas-description"></p>
                             </div>
                         </div>
-                        <div class="bento-card bento-about-role glass-card">
-                            <div class="bento-icon-badge role-icon"><i class="fas fa-briefcase"></i></div>
-                            <div class="bento-header">
-                                <span class="bento-subtitle">Current Status</span>
-                                <h3>Now Building</h3>
-                            </div>
-                            <div class="role-credential">
-                                <div class="role-accent-line"></div>
-                                <div class="role-main">
-                                    <h4 id="current-role-title"></h4>
-                                    <p id="current-role-org"></p>
-                                </div>
-                            </div>
-                        </div>
+                        
                         <div class="bento-submissions-container">
-                            <div id="contribution-grids" class="grids-container side-by-side">
+                            <div id="contribution-grids" class="grids-container">
                                 <!-- GitHub and LeetCode grids -->
                             </div>
                         </div>
@@ -263,12 +257,25 @@
         <div id="admin-login-overlay" class="admin-login-overlay" style="display: none;">
             <div class="admin-login-modal glass-card">
                 <h3>Admin Access</h3>
+                <!-- Step 1: Password -->
                 <form id="admin-login-form">
+                    <input type="email" id="admin-email" placeholder="Enter email" required>
                     <input type="password" id="admin-password" placeholder="Enter password" required>
                     <div class="modal-actions">
-                        <button type="submit" class="btn btn-primary">Login</button>
+                        <button type="submit" class="btn btn-primary">Next</button>
                         <button type="button" id="admin-cancel" class="btn btn-outline">Cancel</button>
                     </div>
+                </form>
+
+                <!-- Step 2: OTP (Hidden by default) -->
+                <form id="admin-otp-form" style="display: none;">
+                    <p class="modal-notice">A 6-digit code has been sent to your email.</p>
+                    <input type="text" id="admin-otp" placeholder="6-digit code" maxlength="6" required autocomplete="one-time-code">
+                    <div class="modal-actions">
+                        <button type="submit" class="btn btn-primary">Verify & Login</button>
+                        <button type="button" id="admin-otp-back" class="btn btn-outline">Back</button>
+                    </div>
+                    <button type="button" id="admin-otp-resend" class="otp-resend-link">Resend Code</button>
                 </form>
             </div>
         </div>
@@ -278,7 +285,7 @@
     </div>
 
     <!-- Scripts -->
-    <script src="script.js"></script>
+    <script type="module" src="script.js"></script>
 </body>
 
 </html>

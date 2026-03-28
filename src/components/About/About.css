@@ -1,0 +1,306 @@
+/* ---- About Section Foundation ---- */
+.about-section {
+    position: relative;
+    padding: 80px 0;
+    overflow-x: hidden; /* Prevent horizontal scroll from Framer Motion x animations */
+}
+
+/* ---- Responsive Grid Layout (Mobile-First) ---- */
+.about-grid-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    width: 100%;
+}
+
+@media (min-width: 1024px) {
+    .about-grid-wrapper {
+        flex-direction: row;
+        align-items: flex-start;
+    }
+}
+
+.about-main-content {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    flex: 1.2;
+    width: 100%;
+}
+
+.about-activity-content {
+    flex: 0.9;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+}
+
+/* ---- Card Aesthetics (Obsidian Ember) ---- */
+.about-card {
+    padding: 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    height: 100%;
+}
+
+.about-icon-badge {
+    width: 48px;
+    height: 48px;
+    background: rgba(255, 106, 61, 0.1);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent);
+    font-size: 1.4rem;
+    position: relative;
+}
+
+.about-subtitle {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent-soft);
+    margin-bottom: 8px;
+    display: block;
+}
+
+.about-title {
+    font-size: 1.4rem;
+    font-weight: 700;
+}
+
+.about-text {
+    line-height: 1.8;
+    color: var(--text-secondary);
+    font-size: 1rem;
+}
+
+.about-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: auto;
+}
+
+.about-tag {
+    font-size: 0.75rem;
+    padding: 6px 14px;
+    background: rgba(255, 106, 61, 0.08);
+    border: 1px solid rgba(255, 106, 61, 0.2);
+    border-radius: 50px;
+    color: var(--accent);
+}
+
+/* ---- Status List & Indicators ---- */
+.status-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.status-item {
+    display: flex;
+    gap: 18px;
+    align-items: flex-start;
+}
+
+.status-indicator {
+    position: relative;
+    width: 14px;
+    height: 14px;
+    margin-top: 6px;
+}
+
+.status-dot, .status-ping {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    position: absolute;
+    background: var(--accent);
+}
+
+.status-ping {
+    animation: status-ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+    opacity: 0.7;
+}
+
+/* Secondary status colors */
+.amber-dot, .amber-ping { background: #FFB26B; }
+.subtle-dot, .subtle-ping { background: #666666; }
+
+@keyframes status-ping {
+    75%, 100% { transform: scale(3); opacity: 0; }
+}
+
+.status-content h4 {
+    font-size: 1.05rem;
+    margin-bottom: 4px;
+}
+
+.status-content p {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+/* ---- Activity Grids (GitHub) ---- */
+.github-contribution-grid, .leetcode-contribution-grid {
+    width: 100%;
+}
+
+.github-grid-img, .leetcode-grid-img {
+    width: 100%;
+    height: auto;
+    border-radius: var(--radius-sm);
+    filter: brightness(0.9) contrast(1.1);
+}
+
+.grid-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.grid-footer {
+    margin-top: 12px;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    text-align: right;
+}
+
+.github-grid-link, .leetcode-grid-link {
+    padding: 24px;
+    display: block;
+    text-decoration: none;
+    color: inherit;
+}
+
+/* ---- GitHub Contributors Grid ---- */
+.contributors-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+}
+
+.contributors-header h3 {
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+.contributors-badge {
+    font-size: 0.7rem;
+    padding: 4px 12px;
+    background: var(--accent);
+    color: #fff;
+    border-radius: 50px;
+}
+
+.contributors-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 16px;
+    width: 100%;
+}
+
+.contributor-card {
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 14px;
+    text-decoration: none;
+    color: inherit;
+    width: 100%;
+}
+
+.contributor-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid var(--border-color);
+}
+
+.contributor-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.contributor-name {
+    font-weight: 600;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
+}
+
+.contributor-role {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+}
+
+.contributor-link-icon {
+    font-size: 0.8rem;
+    color: var(--accent);
+    opacity: 0.5;
+}
+
+/* ---- Skeleton & Empty States ---- */
+.skeleton-card {
+    height: 140px;
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+.shimmer {
+    background: linear-gradient(
+        90deg,
+        var(--surface) 25%,
+        rgba(255, 106, 61, 0.05) 50%,
+        var(--surface) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+.skeleton-avatar { width: 48px; height: 48px; border-radius: 50%; background: rgba(255, 255, 255, 0.05); }
+.skeleton-text { width: 70%; height: 10px; background: rgba(255, 255, 255, 0.05); border-radius: 4px; }
+.skeleton-text.short { width: 40%; }
+
+.contributors-state {
+    padding: 40px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    color: var(--text-muted);
+}
+
+.contributors-state i {
+    font-size: 2rem;
+    opacity: 0.5;
+}
+
+.error-state { border-color: #ef4444; }
+.error-subtext { font-size: 0.75rem; opacity: 0.7; }

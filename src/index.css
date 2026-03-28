@@ -4,59 +4,60 @@
    =================================================== */
 
 :root {
-  /* ---- Lavender Blue + Sky Blue Palette ---- */
-  --lavender: #7B8CDE;
-  --lavender-light: #A8B4F0;
-  --lavender-deep: #5C6BC0;
-  --sky: #7EC8E3;
-  --sky-light: #B3E0F2;
-  --sky-deep: #4BA3C7;
-  --mint: #81E6D9;
-
-  /* Dark theme */
-  --bg-primary: #0B0F1A;
-  --bg-secondary: #111827;
-  --bg-card: rgba(17, 24, 39, 0.75);
-  --bg-glass: rgba(17, 24, 39, 0.55);
-  --text-primary: #E8EAF6;
-  --text-secondary: #94A3B8;
-  --text-muted: #64748B;
-  --border-color: rgba(123, 140, 222, 0.18);
-  --border-glass: rgba(255, 255, 255, 0.06);
-  --glow: 0 0 40px rgba(123, 140, 222, 0.12);
-  --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
-  --gradient-main: linear-gradient(135deg, var(--lavender), var(--sky));
-  --gradient-accent: linear-gradient(135deg, var(--lavender-light), var(--sky-light));
-  --gradient-subtle: linear-gradient(135deg, rgba(123, 140, 222, 0.08), rgba(126, 200, 227, 0.08));
-  --gradient-text: linear-gradient(135deg, var(--lavender-light), var(--sky), var(--mint));
-  --nav-bg: rgba(11, 15, 26, 0.82);
-  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  --radius: 16px;
-  --radius-sm: 10px;
+  /* ---- Obsidian Ember Design System ---- */
+  --bg: #0A0A0A;
+  --surface: #141414;
+  --accent: #FF6A3D; /* Ember Orange */
+  --accent-soft: #FFB26B; /* Warm Glow */
+  --border: #2A2A2A;
+  --text: #F5F5F5;
+  --muted: #9A9A9A;
+  
+  /* Derived Tokens */
+  --bg-primary: var(--bg);
+  --bg-secondary: var(--surface);
+  --bg-card: rgba(20, 20, 20, 0.85);
+  --bg-glass: rgba(10, 10, 10, 0.6);
+  
+  --text-primary: var(--text);
+  --text-secondary: var(--muted);
+  --text-muted: #666666;
+  
+  --accent-gradient: linear-gradient(135deg, #FF6A3D, #FFB26B);
+  --gradient-main: var(--accent-gradient);
+  --gradient-text: linear-gradient(135deg, #F5F5F5, #FFB26B, #FF6A3D);
+  --gradient-accent: var(--accent-gradient);
+  --gradient-subtle: linear-gradient(135deg, rgba(255, 106, 61, 0.03), rgba(255, 178, 107, 0.03));
+  
+  /* Borders & Shadows */
+  --border-color: var(--border);
+  --border-glass: rgba(255, 255, 255, 0.04);
+  --glow: 0 0 25px rgba(255, 106, 61, 0.15);
+  --card-shadow: 0 12px 48px rgba(0, 0, 0, 0.6);
+  --nav-bg: rgba(10, 10, 10, 0.85);
+  
+  --transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  --radius: 10px;
+  --radius-sm: 6px;
   --radius-pill: 50px;
 }
 
 [data-theme="light"] {
-  --bg-primary: #F4F6FC;
-  --bg-secondary: #E8ECF8;
-  --bg-card: rgba(255, 255, 255, 0.82);
-  --bg-glass: rgba(255, 255, 255, 0.65);
-  --text-primary: #1E293B;
-  --text-secondary: #475569;
-  --text-muted: #94A3B8;
-  --border-color: rgba(123, 140, 222, 0.22);
-  --border-glass: rgba(123, 140, 222, 0.12);
-  --glow: 0 0 30px rgba(123, 140, 222, 0.08);
-  --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
-  --gradient-subtle: linear-gradient(135deg, rgba(123, 140, 222, 0.06), rgba(126, 200, 227, 0.06));
-  --nav-bg: rgba(244, 246, 252, 0.88);
+  --bg: #FDFCFB;
+  --surface: #F5F2F0;
+  --text: #1A1412;
+  --muted: #6B5D57;
+  --border: rgba(255, 106, 61, 0.15);
+  --bg-glass: rgba(253, 252, 251, 0.8);
+  --card-shadow: 0 12px 32px rgba(25, 20, 15, 0.05);
+  --nav-bg: rgba(253, 252, 251, 0.9);
 }
 
 /* ---- Admin Specific Tokens ---- */
 :root {
   --admin-sidebar-w: 260px;
-  --admin-accent: var(--lavender);
-  --admin-accent-soft: rgba(123, 140, 222, 0.1);
+  --admin-accent: var(--accent);
+  --admin-accent-soft: rgba(201, 162, 39, 0.1);
   --admin-bg-main: var(--bg-primary);
   /* Use global bg-primary */
   --admin-card-bg: var(--bg-card);
@@ -112,16 +113,14 @@ a {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--lavender-deep);
+  background: #333333;
   border-radius: 20px;
-  border: 2px solid var(--bg-secondary);
+  border: 4px solid var(--bg);
   transition: var(--transition);
-  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--lavender);
-  box-shadow: 0 0 15px rgba(123, 140, 222, 0.3);
+  background: var(--accent);
 }
 
 /* ---- Scroll Progress Container ---- */
@@ -150,10 +149,10 @@ a {
   right: 0;
   width: 40px;
   height: 100%;
-  background: var(--lavender-light);
+  background: var(--accent-light);
   filter: blur(8px);
   opacity: 0.8;
-  box-shadow: 0 0 15px var(--lavender);
+  box-shadow: 0 0 15px var(--accent);
 }
 
 /* ---- Navbar — Floating Pill Capsule ---- */
@@ -481,7 +480,7 @@ a {
 /* --- Admin Dashboard Revised --- */
 .admin-dashboard {
   min-height: 100vh;
-  background: #0B0F1A !important;
+  background: #0F0F0F !important;
   color: #ffffff !important;
   display: flex;
   flex-direction: column;
@@ -867,7 +866,7 @@ a {
   font-family: 'JetBrains Mono', monospace;
   font-size: 1rem;
   font-weight: 500;
-  color: var(--lavender);
+  color: var(--accent);
 }
 
 .heading-line {
@@ -919,7 +918,7 @@ a {
   pointer-events: none;
   z-index: 1;
   background: radial-gradient(600px circle at var(--mouse-x, 0) var(--mouse-y, 0),
-      rgba(123, 140, 222, 0.08),
+      rgba(255, 106, 61, 0.08),
       transparent 80%);
   transition: opacity 0.3s;
 }
@@ -930,7 +929,7 @@ a {
   width: 650px;
   height: 650px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(123, 140, 222, 0.12), transparent 70%);
+  background: radial-gradient(circle, rgba(255, 106, 61, 0.12), transparent 70%);
   top: -200px;
   right: -200px;
   filter: blur(80px);
@@ -944,7 +943,7 @@ a {
   width: 480px;
   height: 480px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(126, 200, 227, 0.1), transparent 70%);
+  background: radial-gradient(circle, rgba(255, 178, 107, 0.1), transparent 70%);
   bottom: -180px;
   left: -180px;
   filter: blur(80px);
@@ -1444,6 +1443,142 @@ a {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+}
+
+/* ---- ABOUT BENTO GRID ---- */
+.about-bento-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-auto-rows: minmax(160px, auto);
+  gap: 20px;
+  margin-top: 40px;
+}
+
+.bento-card {
+  position: relative;
+  overflow: hidden;
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.bento-about-main {
+  grid-column: span 2;
+  grid-row: span 2;
+}
+
+.bento-about-role {
+  grid-column: span 1;
+  grid-row: span 2;
+}
+
+.bento-submissions-container {
+  grid-column: span 3;
+}
+
+.bento-content-wrapper {
+  position: relative;
+  z-index: 2;
+}
+
+.bento-icon-badge {
+  width: 42px;
+  height: 42px;
+  background: rgba(255, 106, 61, 0.1);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+  margin-bottom: 24px;
+}
+
+.bento-subtitle {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--accent-soft);
+  margin-bottom: 8px;
+  display: block;
+}
+
+.bento-description {
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: var(--text-secondary);
+  max-width: 90%;
+}
+
+.role-credential {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  margin-top: auto;
+}
+
+.role-accent-line {
+  width: 3px;
+  height: 40px;
+  background: var(--accent-gradient);
+  border-radius: 2px;
+}
+
+.role-main h4 {
+  font-size: 1.1rem;
+  margin-bottom: 4px;
+}
+
+.role-main p {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.grids-container.side-by-side {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.grid-item {
+  width: 100%;
+}
+
+/* Activity Grid Styles */
+.github-grid-img, .leetcode-grid-img {
+  width: 100%;
+  height: auto;
+  border-radius: 4px;
+  filter: brightness(0.9) contrast(1.1);
+}
+
+.grid-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.grid-footer {
+  margin-top: 16px;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-align: right;
+}
+
+@media (max-width: 992px) {
+  .about-bento-grid {
+    grid-template-columns: 1fr;
+  }
+  .bento-about-main, .bento-about-role, .bento-submissions-container {
+    grid-column: span 1;
+  }
+  .grids-container.side-by-side {
+    grid-template-columns: 1fr;
+  }
 }
 
 .stat-label {
