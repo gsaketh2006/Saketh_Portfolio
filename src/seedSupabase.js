@@ -30,12 +30,37 @@ export const seedSupabase = async () => {
         // 3. Seed Certifications
         const { error: certError } = await supabase
             .from('certifications')
-            .insert(initialData.certifications.map((cert, i) => ({ ...cert, order_index: i })));
+            .insert(initialData.certifications.map((cert, i) => ({ 
+                title: cert.title || '',
+                organization: cert.organization || '',
+                image_url: cert.image || '',
+                issue_date: cert.issueDate || '',
+                credential_id: cert.credentialId || '',
+                credential_url: cert.credentialUrl || '',
+                color: cert.color || '#FF6A3D',
+                order_index: i 
+            })));
         
-        if (certError) console.warn('Certifications seeding skipped (might already exist)');
+        if (certError) console.warn('Certifications seeding issue:', certError);
         else console.log('✅ Certifications seeded.');
 
-        // 4. Seed Skills
+        // 4. Seed Projects
+        if (initialData.projects?.length > 0) {
+            const { error: projError } = await supabase
+                .from('projects')
+                .insert(initialData.projects.map((p, i) => ({ 
+                    name: p.name || '',
+                    description: p.description || '',
+                    url: p.url || '',
+                    language: p.language || '',
+                    image_url: p.image_url || '',
+                    order_index: i 
+                })));
+            if (projError) console.warn('Projects seeding issue:', projError);
+            else console.log('✅ Projects seeded.');
+        }
+
+        // 5. Seed Skills
         const flatSkills = [];
         Object.entries(initialData.skills).forEach(([category, skills], catIdx) => {
             skills.forEach((skill, skillIdx) => {

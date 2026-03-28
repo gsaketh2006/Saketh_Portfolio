@@ -111,6 +111,15 @@ export const initialData = {
             color: "#FF6A3D"
         }
     ],
+    projects: [
+        {
+            name: "Portfolio Project",
+            description: "A professional portfolio website built with React and Supabase.",
+            url: "https://github.com/gsaketh2006/Saketh_Portfolio",
+            language: "React",
+            image_url: ""
+        }
+    ],
     contact: {
         title: "Get In Touch",
         heading: "Let's Work Together",

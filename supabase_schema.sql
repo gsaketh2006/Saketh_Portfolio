@@ -49,24 +49,57 @@ CREATE TABLE IF NOT EXISTS skills (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- 5. Enable Row Level Security (RLS)
+-- 5. Create Projects Table (Manual Projects)
+CREATE TABLE IF NOT EXISTS projects (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name TEXT NOT NULL,
+    description TEXT,
+    url TEXT,
+    language TEXT,
+    image_url TEXT,
+    order_index INT DEFAULT 0,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- 6. Enable Row Level Security (RLS)
 ALTER TABLE portfolio_data ENABLE ROW LEVEL SECURITY;
 ALTER TABLE experience ENABLE ROW LEVEL SECURITY;
 ALTER TABLE certifications ENABLE ROW LEVEL SECURITY;
 ALTER TABLE skills ENABLE ROW LEVEL SECURITY;
+ALTER TABLE projects ENABLE ROW LEVEL SECURITY;
 
 -- 6. Create Public Read Policies
+DROP POLICY IF EXISTS "Public Read Access" ON portfolio_data;
 CREATE POLICY "Public Read Access" ON portfolio_data FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Public Read Access" ON experience;
 CREATE POLICY "Public Read Access" ON experience FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Public Read Access" ON certifications;
 CREATE POLICY "Public Read Access" ON certifications FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Public Read Access" ON skills;
 CREATE POLICY "Public Read Access" ON skills FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Public Read Access" ON projects;
+CREATE POLICY "Public Read Access" ON projects FOR SELECT USING (true);
 
 -- 7. Create Admin Permission Policies (Allow all for ANON during setup, but SHOULD be secured later)
 -- Note: Replace 'true' with a check for auth.uid() if you implement Supabase Auth
+DROP POLICY IF EXISTS "Enable All for now" ON portfolio_data;
 CREATE POLICY "Enable All for now" ON portfolio_data FOR ALL USING (true);
+
+DROP POLICY IF EXISTS "Enable All for now" ON experience;
 CREATE POLICY "Enable All for now" ON experience FOR ALL USING (true);
+
+DROP POLICY IF EXISTS "Enable All for now" ON certifications;
 CREATE POLICY "Enable All for now" ON certifications FOR ALL USING (true);
+
+DROP POLICY IF EXISTS "Enable All for now" ON skills;
 CREATE POLICY "Enable All for now" ON skills FOR ALL USING (true);
+
+DROP POLICY IF EXISTS "Enable All for now" ON projects;
+CREATE POLICY "Enable All for now" ON projects FOR ALL USING (true);
 
 -- 8. Seed the single row for portfolio_data
 INSERT INTO portfolio_data (id) VALUES ('00000000-0000-0000-0000-000000000000'::uuid)
