@@ -1,7 +1,6 @@
 import React from 'react';
 import './About.css';
 import Description from './Description';
-import Status from './Status';
 import GithubContributionGrid from '../GithubContributionGrid';
 import LeetCodeContributionGrid from '../LeetCodeContributionGrid';
 
@@ -18,15 +17,11 @@ const About = ({ data, settings }) => {
                 </h2>
 
                 <div className="about-grid-wrapper">
-                    {/* Part 1: Description & Part 2: Status */}
+                    {/* Part 1: Description */}
                     <div className="about-main-content">
                         <Description 
                             title={data.title} 
                             description={data.description} 
-                        />
-                        <Status 
-                            roleTitle={data.currentRoleTitle} 
-                            roleOrg={data.currentRoleOrg} 
                         />
                     </div>
 

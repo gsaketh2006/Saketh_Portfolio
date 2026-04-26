@@ -54,13 +54,24 @@ AI/ML-focused Computer Science undergraduate with hands-on experience in buildin
 
 ---
 
-## ⚙️ Tech Stack Used in Portfolio
-- HTML, CSS, JavaScript  
-- (or React if applicable)  
-- Supabase (Backend & Database)  
-- Vercel (Deployment)  
+## 🚀 Deployment (Vercel)
+
+1.  **Push your code** to GitHub.
+2.  **Import the project** in Vercel.
+3.  **Environment Variables**: In the Vercel dashboard, add the following under "Settings > Environment Variables":
+    - `VITE_SUPABASE_URL`: Your Supabase Project URL.
+    - `VITE_SUPABASE_ANON_KEY`: Your Supabase Anon Key.
+4.  **Build Command**: `npm run build`
+5.  **Output Directory**: `dist`
+6.  **Framework Preset**: Vite
 
 ---
+
+## ⚙️ Tech Stack
+- **Frontend**: React.js, Vite, Framer Motion, TailwindCSS
+- **3D Graphics**: Spline
+- **Backend**: Supabase (Postgres, Auth, Real-time)
+- **Deployment**: Vercel
 
 ## ⭐️ Show Your Support
 If you like this portfolio, give it a ⭐ on GitHub!

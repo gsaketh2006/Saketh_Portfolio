@@ -17,27 +17,6 @@ const AdminAboutPanel = ({ data, settings, onUpdate, onDeepUpdate }) => {
                 />
             </div>
 
-            <div className="form-grid">
-                <div className="form-group">
-                    <label>Current Role Title</label>
-                    <input
-                        type="text"
-                        value={data.currentRoleTitle}
-                        onChange={e => onUpdate('about', 'currentRoleTitle', e.target.value)}
-                        placeholder="e.g. Software Engineer"
-                    />
-                </div>
-                <div className="form-group">
-                    <label>Current Role Organization</label>
-                    <input
-                        type="text"
-                        value={data.currentRoleOrg}
-                        onChange={e => onUpdate('about', 'currentRoleOrg', e.target.value)}
-                        placeholder="e.g. Google"
-                    />
-                </div>
-            </div>
-
             <div className="admin-integration-box glass-card" style={{ marginTop: '20px', padding: '20px' }}>
                 <h4><i className="fab fa-github"></i> GitHub Integration</h4>
                 <div className="form-grid">

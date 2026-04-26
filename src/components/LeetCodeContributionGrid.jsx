@@ -23,7 +23,7 @@ const LeetCodeContributionGrid = ({ username }) => {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="leetcode-grid-link glass-card"
-                whileHover={{ scale: 1.02, boxShadow: '0 0 20px rgba(255, 178, 107, 0.15)' }}
+                whileHover={{ scale: 1.02, boxShadow: '0 0 20px hsl(var(--primary) / 0.15)' }}
                 whileTap={{ scale: 0.98 }}
             >
                 <div className="grid-header">

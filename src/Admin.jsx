@@ -8,6 +8,7 @@ const Admin = ({ data, onSave, onExit }) => {
     const [editedData, setEditedData] = useState(data);
     const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
     const [saveFlash, setSaveFlash] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
     const [projectSubTab, setProjectSubTab] = useState('active'); // 'active' or 'recycle'
     const [githubRepos, setGithubRepos] = useState([]);
     const [isLoadingGithub, setIsLoadingGithub] = useState(false);
@@ -218,6 +219,7 @@ const Admin = ({ data, onSave, onExit }) => {
     // --- Save (Supabase Persistent Persistence) ---
     const saveChanges = async () => {
         try {
+            setIsSaving(true);
             setSaveFlash(false);
             
             const errors = [];
@@ -261,7 +263,7 @@ const Admin = ({ data, onSave, onExit }) => {
                             issue_date: cert.issueDate || '',
                             credential_id: cert.credentialId || '',
                             credential_url: cert.credentialUrl || '',
-                            color: cert.color || '#FF6A3D',
+                            color: cert.color || 'hsl(var(--primary))',
                             order_index: i
                         })));
                     if (certError) throw certError;
@@ -326,6 +328,8 @@ const Admin = ({ data, onSave, onExit }) => {
         } catch (error) {
             console.error('Core Auth/Network Error:', error);
             alert('A critical error occurred while saving. Please check your connection.');
+        } finally {
+            setIsSaving(false);
         }
     };
 
@@ -362,8 +366,8 @@ const Admin = ({ data, onSave, onExit }) => {
                     </div>
                 </div>
                 <div className="admin-controls">
-                    <button className="btn btn-primary btn-save" onClick={saveChanges}>
-                        <i className="fas fa-save"></i> <span className="btn-text">Save All</span>
+                    <button className={`btn btn-primary btn-save ${isSaving ? 'loading' : ''}`} onClick={saveChanges}>
+                        <i className="fas fa-save"></i> <span className="btn-text">{isSaving ? 'Saving...' : 'Save All'}</span>
                     </button>
                     <button className="btn btn-outline btn-exit" onClick={onExit}>
                         <i className="fas fa-sign-out-alt"></i> <span className="btn-text">Exit</span>
@@ -400,10 +404,10 @@ const Admin = ({ data, onSave, onExit }) => {
                                 <div className="form-group"><label>GitHub Username</label><input type="text" value={editedData.settings.githubUsername} onChange={e => handleUpdate('settings', 'githubUsername', e.target.value)} /></div>
                                 <div className="form-group"><label>Footer Text</label><input type="text" value={editedData.settings.footer?.text || ''} onChange={e => handleDeepUpdate('settings', 'footer', 'text', e.target.value)} /></div>
                             </div>
-                            <div className="admin-danger-zone" style={{ marginTop: '40px', padding: '20px', border: '1px solid #ff4d4d', borderRadius: '8px', background: 'rgba(255, 77, 77, 0.05)' }}>
-                                <h4 style={{ color: '#ff4d4d', marginBottom: '10px' }}><i className="fas fa-exclamation-triangle"></i> Migration Tools</h4>
+                            <div className="admin-danger-zone" style={{ marginTop: '40px', padding: '20px', border: '1px solid hsl(var(--primary))', borderRadius: '8px', background: 'hsl(var(--primary) / 0.05)' }}>
+                                <h4 style={{ color: 'hsl(var(--primary))', marginBottom: '10px' }}><i className="fas fa-exclamation-triangle"></i> Migration Tools</h4>
                                 <p style={{ fontSize: '0.9rem', marginBottom: '15px', color: '#ccc' }}>Use this tool to migrate your local <code>initialData.js</code> content to the Supabase database. This will overwrite existing data!</p>
-                                <button className="btn btn-outline" style={{ borderColor: '#ff4d4d', color: '#ff4d4d' }} onClick={seedSupabase}>
+                                <button className="btn btn-outline" style={{ borderColor: 'hsl(var(--primary))', color: 'hsl(var(--primary))' }} onClick={seedSupabase}>
                                     <i className="fas fa-upload"></i> Seed Database from Local
                                 </button>
                             </div>
@@ -792,11 +796,7 @@ const Admin = ({ data, onSave, onExit }) => {
                                 <input
                                     type="text"
                                     value={editedData.settings.footer.text}
-                                    onChange={e => {
-                                        const newData = { ...editedData };
-                                        newData.settings.footer.text = e.target.value;
-                                        setEditedData(newData);
-                                    }}
+                                    onChange={e => handleDeepUpdate('settings', 'footer', 'text', e.target.value)}
                                     placeholder="Designed & Built by..."
                                 />
                             </div>
@@ -805,11 +805,7 @@ const Admin = ({ data, onSave, onExit }) => {
                                 <input
                                     type="number"
                                     value={editedData.settings.footer.year}
-                                    onChange={e => {
-                                        const newData = { ...editedData };
-                                        newData.settings.footer.year = parseInt(e.target.value) || new Date().getFullYear();
-                                        setEditedData(newData);
-                                    }}
+                                    onChange={e => handleDeepUpdate('settings', 'footer', 'year', parseInt(e.target.value) || new Date().getFullYear())}
                                     placeholder="2025"
                                 />
                             </div>

@@ -1,12 +1,154 @@
 import { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useScroll, useSpring, useMotionValue, useTransform } from 'framer-motion';
 import { initialData } from './initialData';
 import Admin from './Admin';
 import About from './components/About/About';
 import { supabase } from './lib/supabase';
+import React, { Suspense } from 'react';
+
+const Spline = React.lazy(() => import("@splinetool/react-spline"));
+
+// --- Custom Hooks ---
+const useMagnetic = (ref, strength = 0.5) => {
+    const x = useMotionValue(0);
+    const y = useMotionValue(0);
+    const springX = useSpring(x, { stiffness: 150, damping: 15 });
+    const springY = useSpring(y, { stiffness: 150, damping: 15 });
+
+    useEffect(() => {
+        const handleMouseMove = (e) => {
+            if (!ref.current) return;
+            const { left, top, width, height } = ref.current.getBoundingClientRect();
+            const centerX = left + width / 2;
+            const centerY = top + height / 2;
+            const distanceX = e.clientX - centerX;
+            const distanceY = e.clientY - centerY;
+            
+            if (Math.abs(distanceX) < width && Math.abs(distanceY) < height) {
+                x.set(distanceX * strength);
+                y.set(distanceY * strength);
+            } else {
+                x.set(0);
+                y.set(0);
+            }
+        };
+        window.addEventListener('mousemove', handleMouseMove);
+        return () => window.removeEventListener('mousemove', handleMouseMove);
+    }, [ref, strength, x, y]);
+
+    return { x: springX, y: springY };
+};
+
+// --- Motion Components ---
+const CustomCursor = () => {
+    const cursorX = useMotionValue(-100);
+    const cursorY = useMotionValue(-100);
+    const springX = useSpring(cursorX, { stiffness: 500, damping: 28 });
+    const springY = useSpring(cursorY, { stiffness: 500, damping: 28 });
+    const [isHovered, setIsHovered] = useState(false);
+
+    useEffect(() => {
+        const moveCursor = (e) => {
+            cursorX.set(e.clientX);
+            cursorY.set(e.clientY);
+        };
+        const handleHover = (e) => {
+            const target = e.target;
+            const isClickable = target.closest('a, button, .project-bar, .skill-card, .cert-card');
+            setIsHovered(!!isClickable);
+        };
+        window.addEventListener('mousemove', moveCursor);
+        window.addEventListener('mouseover', handleHover);
+        return () => {
+            window.removeEventListener('mousemove', moveCursor);
+            window.removeEventListener('mouseover', handleHover);
+        };
+    }, [cursorX, cursorY]);
+
+    return (
+        <div className={isHovered ? 'cursor-hover' : ''}>
+            <motion.div className="custom-cursor" style={{ x: springX, y: springY, translateX: '-50%', translateY: '-50%' }} />
+            <motion.div className="custom-cursor-outline" style={{ x: springX, y: springY, translateX: '-50%', translateY: '-50%' }} />
+        </div>
+    );
+};
+
+const ScrollProgress = () => {
+    const { scrollYProgress } = useScroll();
+    const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30, restDelta: 0.001 });
+    return (
+        <div className="scroll-progress-container">
+            <motion.div className="scroll-progress-bar" style={{ scaleX, originX: 0 }} />
+        </div>
+    );
+};
+
+const MagneticButton = ({ children, className, ...props }) => {
+    const ref = useRef(null);
+    const { x, y } = useMagnetic(ref);
+    return (
+        <motion.div ref={ref} style={{ x, y }} className="magnetic-wrap">
+            <motion.button className={className} {...props}>{children}</motion.button>
+        </motion.div>
+    );
+};
+
+const TiltCard = ({ children, className, ...props }) => {
+    const x = useMotionValue(0);
+    const y = useMotionValue(0);
+    const rotateX = useTransform(y, [-100, 100], [10, -10]);
+    const rotateY = useTransform(x, [-100, 100], [-10, 10]);
+    const springX = useSpring(rotateX);
+    const springY = useSpring(rotateY);
+
+    const handleMouseMove = (e) => {
+        const rect = e.currentTarget.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        x.set(e.clientX - centerX);
+        y.set(e.clientY - centerY);
+    };
+
+    const handleMouseLeave = () => {
+        x.set(0);
+        y.set(0);
+    };
+
+    return (
+        <motion.div
+            className={className}
+            onMouseMove={handleMouseMove}
+            onMouseLeave={handleMouseLeave}
+            style={{ rotateX: springX, rotateY: springY, perspective: 1000 }}
+            {...props}
+        >
+            {children}
+        </motion.div>
+    );
+};
+
+const RevealText = ({ text, delay = 0 }) => {
+    const words = text.split(' ');
+    return (
+        <span className="reveal-text">
+            {words.map((word, i) => (
+                <span key={i} style={{ display: 'inline-block', overflow: 'hidden', marginRight: '0.25em' }}>
+                    <motion.span
+                        className="reveal-word"
+                        initial={{ y: '100%' }}
+                        whileInView={{ y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.8, delay: delay + i * 0.05, ease: [0.22, 1, 0.36, 1] }}
+                    >
+                        {word}
+                    </motion.span>
+                </span>
+            ))}
+        </span>
+    );
+};
 
 // --- Animated Counter Hook ---
-// eslint-disable-next-line no-unused-vars
 const useCountUp = (end, duration = 2000, startOnView = true) => {
     const [count, setCount] = useState(0);
     const [started, setStarted] = useState(!startOnView);
@@ -36,6 +178,12 @@ const useCountUp = (end, duration = 2000, startOnView = true) => {
     }, [started, end, duration]);
 
     return { count, ref };
+};
+
+const MotionLayer = ({ children, speed = 0.1 }) => {
+    const { scrollY } = useScroll();
+    const y = useTransform(scrollY, [0, 5000], [0, speed * 5000]);
+    return <motion.div style={{ y }}>{children}</motion.div>;
 };
 
 const App = () => {
@@ -145,7 +293,12 @@ const App = () => {
     }, []);
 
     useEffect(() => {
+        let lastScroll = 0;
         const handleScroll = () => {
+            const now = Date.now();
+            if (now - lastScroll < 50) return; // Throttle to ~20fps
+            lastScroll = now;
+
             setScrolled(window.scrollY > 50);
             const sections = ['home', 'about', 'skills', 'projects', 'experience', 'certifications', 'contact'];
             let current = 'home';
@@ -168,11 +321,10 @@ const App = () => {
 
     const toggleTheme = () => setTheme(prev => prev === 'dark' ? 'light' : 'dark');
 
-    const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-
     useEffect(() => {
         const handleMouseMove = (e) => {
-            setMousePos({ x: e.clientX, y: e.clientY });
+            document.documentElement.style.setProperty('--mouse-x', `${e.clientX}px`);
+            document.documentElement.style.setProperty('--mouse-y', `${e.clientY}px`);
         };
         window.addEventListener('mousemove', handleMouseMove);
         return () => window.removeEventListener('mousemove', handleMouseMove);
@@ -196,28 +348,46 @@ const App = () => {
 
     return (
         <>
-            {/* Preloader */}
+            {/* Immersive Foundations */}
+            <div className="vignette" />
+            <CustomCursor />
+            {/* Removed duplicated ScrollProgress */}
+            
             <AnimatePresence>
                 {loading && (
                     <motion.div
                         className="preloader"
-                        initial={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.6, ease: 'easeInOut' }}
+                        exit={{ 
+                            clipPath: 'polygon(0 0, 100% 0, 100% 0, 0 0)',
+                            transition: { duration: 1, ease: [0.76, 0, 0.24, 1] } 
+                        }}
                     >
-                        <div className="preloader-inner">
-                            <div className="preloader-ring"></div>
-                            <span className="preloader-text">Saketh</span>
-                        </div>
+                        <motion.div 
+                            className="loader-content"
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                        >
+                            <div className="loader-logo">{data.settings?.logoText || 'Saketh'}</div>
+                            <div className="loader-progress">
+                                <motion.div 
+                                    className="loader-bar"
+                                    initial={{ width: 0 }}
+                                    animate={{ width: '100%' }}
+                                    transition={{ duration: 1.5, ease: "easeInOut" }}
+                                />
+                            </div>
+                        </motion.div>
                     </motion.div>
                 )}
             </AnimatePresence>
 
-            <div className="portfolio-app" style={{
-                '--mouse-x': `${mousePos.x}px`,
-                '--mouse-y': `${mousePos.y}px`
-            }}>
-                <ParticlesBackground />
+            <div className="portfolio-app">
+                <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
+                    <Suspense fallback={<div className="absolute inset-0 bg-hero-bg" />}>
+                        <MemoizedSpline />
+                    </Suspense>
+                    <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/20" />
+                </div>
                 <div className="hero-spotlight"></div>
                 <ScrollProgress />
                 {data?.settings?.navLinks && <SideNav navLinks={data.settings.navLinks} activeSection={activeSection} />}
@@ -262,7 +432,7 @@ const App = () => {
                     toggleTheme={toggleTheme}
                 />
                 <main>
-                    <Section id="home"><Hero data={data.hero} mousePos={mousePos} /></Section>
+                    <Section id="home"><Hero data={data.hero} /></Section>
                     <Section id="about"><About data={data.about} settings={data.settings} /></Section>
                     <Section id="skills"><Skills data={data.skills} settings={data.settings} /></Section>
                     <Section id="projects"><Projects settings={data.settings} customProjects={data.projects} /></Section>
@@ -277,27 +447,6 @@ const App = () => {
     );
 };
 
-// --- Scroll Progress Bar ---
-const ScrollProgress = () => {
-    const [width, setWidth] = useState(0);
-    useEffect(() => {
-        const update = () => {
-            const scrollTop = window.scrollY;
-            const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-            setWidth(docHeight > 10 ? (scrollTop / docHeight) * 100 : 0);
-        };
-        update();
-        window.addEventListener('scroll', update, { passive: true });
-        return () => window.removeEventListener('scroll', update);
-    }, []);
-    return (
-        <div className="scroll-progress-container">
-            <div className="scroll-progress-bar" style={{ width: `${width}%` }}>
-                <div className="scroll-progress-glow"></div>
-            </div>
-        </div>
-    );
-};
 
 // --- Side Navigation Dots ---
 const SideNav = ({ navLinks, activeSection }) => {
@@ -329,90 +478,17 @@ const Section = ({ children, id }) => (
     <motion.section
         id={id}
         className="section"
-        initial={{ opacity: 0, y: 30 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.15 }}
-        transition={{ duration: 0.8, ease: [0.4, 0, 0.2, 1] }}
+        initial={{ opacity: 0, y: 60, scale: 0.98 }}
+        whileInView={{ opacity: 1, y: 0, scale: 1 }}
+        viewport={{ once: true, amount: 0.1 }}
+        transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
     >
+        <div className="parallax-bg" />
         {children}
     </motion.section>
 );
 
-// --- Background ---
-const ParticlesBackground = () => {
-    const canvasRef = useRef(null);
 
-    useEffect(() => {
-        const canvas = canvasRef.current;
-        if (!canvas) return;
-        const ctx = canvas.getContext('2d');
-
-        const resize = () => {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        };
-        resize();
-        window.addEventListener('resize', resize);
-
-        const particles = [];
-        const count = Math.min(55, Math.floor(window.innerWidth / 28));
-
-        class Particle {
-            constructor() {
-                this.x = Math.random() * canvas.width;
-                this.y = Math.random() * canvas.height;
-                this.size = Math.random() * 2.2 + 0.7;
-                this.vx = (Math.random() - 0.5) * 0.3; // Slower for breathing effect
-                this.vy = (Math.random() - 0.5) * 0.3;
-                this.opacity = Math.random() * 0.45 + 0.18;
-                this.hue = Math.random() * 20 + 10; // Ember Orange/Amber hue range
-            }
-            update() {
-                this.x += this.vx; this.y += this.vy;
-                if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
-                if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
-            }
-            draw() {
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fillStyle = `hsla(${this.hue}, 80%, 55%, ${this.opacity})`;
-                ctx.fill();
-            }
-        }
-
-        for (let i = 0; i < count; i++) particles.push(new Particle());
-
-        let animationId;
-        const animate = () => {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            particles.forEach(p => { p.update(); p.draw(); });
-            for (let i = 0; i < particles.length; i++) {
-                for (let j = i + 1; j < particles.length; j++) {
-                    const dx = particles[i].x - particles[j].x;
-                    const dy = particles[i].y - particles[j].y;
-                    const d = Math.sqrt(dx * dx + dy * dy);
-                    if (d < 130) {
-                        ctx.beginPath();
-                        ctx.moveTo(particles[i].x, particles[i].y);
-                        ctx.lineTo(particles[j].x, particles[j].y);
-                        ctx.strokeStyle = `hsla(20, 70%, 50%, ${0.08 * (1 - d / 130)})`;
-                        ctx.lineWidth = 0.7;
-                        ctx.stroke();
-                    }
-                }
-            }
-            animationId = requestAnimationFrame(animate);
-        };
-        animate();
-
-        return () => {
-            window.removeEventListener('resize', resize);
-            cancelAnimationFrame(animationId);
-        };
-    }, []);
-
-    return <canvas ref={canvasRef} id="particleCanvas" style={{ position: 'fixed', inset: 0, zIndex: -1, opacity: 0.3 }} />;
-};
 
 // --- Navbar ---
 const Navbar = ({ settings, scrolled, activeSection, theme, toggleTheme }) => {
@@ -503,9 +579,9 @@ const Navbar = ({ settings, scrolled, activeSection, theme, toggleTheme }) => {
                 </nav>
 
                 <div className="nav-actions">
-                    <button className="theme-toggle" onClick={toggleTheme} aria-label="Toggle theme">
+                    <MagneticButton className="theme-toggle" onClick={toggleTheme} aria-label="Toggle theme">
                         <i className={`fas fa-${theme === 'dark' ? 'moon' : 'sun'}`}></i>
-                    </button>
+                    </MagneticButton>
                     <button
                         className={`nav-hamburger ${navOpen ? 'active' : ''}`}
                         onClick={() => setNavOpen(!navOpen)}
@@ -521,7 +597,7 @@ const Navbar = ({ settings, scrolled, activeSection, theme, toggleTheme }) => {
 };
 
 // --- Hero ---
-const Hero = ({ data, mousePos }) => {
+const Hero = ({ data }) => {
     const [text, setText] = useState('');
     const [isDeleting, setIsDeleting] = useState(false);
     const [loopNum, setLoopNum] = useState(0);
@@ -549,75 +625,126 @@ const Hero = ({ data, mousePos }) => {
     if (!data) return null;
     return (
         <div className="container hero-grid">
-            <div className="hero-text">
-                <div className="hero-badge"><span className="badge-dot"></span>{data.badgeText}</div>
+            {/* Decorative Elements */}
+            <div className="hero-decoration-1"></div>
+            <div className="hero-decoration-2"></div>
+            
+            <motion.div 
+                className="hero-text"
+                animate={{
+                    y: [0, -8, 0],
+                    transition: { duration: 8, repeat: Infinity, ease: "easeInOut" }
+                }}
+            >
+                <motion.div 
+                    className="hero-badge"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 1.2 }}
+                >
+                    <span className="badge-dot"></span>{data.badgeText}
+                </motion.div>
                 <h1 className="hero-name">
-                    {data.greeting}
-                    <span className="hero-name-typing gradient-text">
+                    <RevealText text={data.greeting} delay={1.4} />
+                    <span className="hero-name-typing gradient-text" style={{ display: 'block' }}>
                         {text}<span className="typing-cursor"></span>
                     </span>
                 </h1>
-                <p className="hero-role"><span className="role-icon">⚡</span>{data.role}</p>
-                <p className="hero-desc">{data.description}</p>
+                <motion.p 
+                    className="hero-role"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 2 }}
+                >
+                    <span className="role-icon">⚡</span>{data.role}
+                </motion.p>
+                <motion.p 
+                    className="hero-desc"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 2.2 }}
+                >
+                    {data.description}
+                </motion.p>
                 <div className="hero-cta">
-                    {data.buttons?.map(b => (
-                        <motion.a
+                    {data.buttons?.map((b, i) => (
+                        <MagneticButton
                             key={b.text}
-                            href={b.href}
                             className={`btn btn-${b.type}`}
-                            whileHover={{ scale: 1.05, y: -2 }}
-                            whileTap={{ scale: 0.98 }}
                             onClick={(e) => {
                                 if (b.href.startsWith('#')) {
                                     e.preventDefault();
                                     document.querySelector(b.href)?.scrollIntoView({ behavior: 'smooth' });
+                                } else {
+                                    window.open(b.href, '_blank');
                                 }
                             }}
                         >
                             <span>{b.text}</span><i className={b.icon}></i>
-                        </motion.a>
+                        </MagneticButton>
                     ))}
                     {data.resumeUrl && (
-                        <motion.a
-                            href={data.resumeUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
+                        <MagneticButton
                             className="btn btn-outline"
-                            whileHover={{ scale: 1.05, y: -2 }}
-                            whileTap={{ scale: 0.98 }}
+                            onClick={() => window.open(data.resumeUrl, '_blank')}
                         >
                             <span>Resume</span><i className="fas fa-download"></i>
-                        </motion.a>
+                        </MagneticButton>
                     )}
                 </div>
                 <div className="hero-socials">
                     {data.socialLinks?.map(s => (
-                        <a key={s.label} href={s.url} target="_blank" rel="noopener noreferrer" aria-label={s.label}><i className={s.icon}></i></a>
+                        <motion.a 
+                            key={s.label} 
+                            href={s.url} 
+                            target="_blank" 
+                            rel="noopener noreferrer" 
+                            aria-label={s.label}
+                            whileHover={{ y: -5, color: '#fff' }}
+                        >
+                            <i className={s.icon}></i>
+                        </motion.a>
                     ))}
                 </div>
-            </div>
+            </motion.div>
             <div className="hero-visual">
                 <motion.div
                     className="hero-avatar-wrap"
-                    style={{
-                        x: (mousePos.x - window.innerWidth / 2) * 0.02,
-                        y: (mousePos.y - window.innerHeight / 2) * 0.02,
+                    animate={{
+                        y: [0, -15, 0],
+                        transition: { duration: 6, repeat: Infinity, ease: "easeInOut" }
                     }}
                 >
-                    <div className="avatar-glow"></div>
-                    <div className="avatar-ring"></div>
-                    {data.avatarImage ? (
-                        <img src={data.avatarImage} alt="Profile" className="avatar-image" />
-                    ) : (
-                        <div className="avatar-placeholder"><i className="fas fa-user"></i></div>
-                    )}
+                    <div className="hero-avatar">
+                        <div className="avatar-glow"></div>
+                        <div className="avatar-circle-decoration">
+                            <svg viewBox="0 0 100 100">
+                                <path id="circlePath" d="M 50, 50 m -37, 0 a 37,37 0 1,1 74,0 a 37,37 0 1,1 -74,0" fill="transparent" />
+                                <text>
+                                    <textPath xlinkHref="#circlePath">
+                                        EVERY AMBITION REQUIRES PREPARATION &bull; EVERY AMBITION REQUIRES PREPARATION &bull;
+                                    </textPath>
+                                </text>
+                            </svg>
+                        </div>
+                        {data.avatarImage ? (
+                            <img src={data.avatarImage} alt="Profile" className="avatar-image" />
+                        ) : (
+                            <div className="avatar-placeholder"><i className="fas fa-user"></i></div>
+                        )}
+                    </div>
                 </motion.div>
             </div>
             {/* Scroll Indicator */}
-            <div className="scroll-indicator">
+            <motion.div 
+                className="scroll-indicator"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 3 }}
+            >
                 <div className="scroll-mouse"><div className="scroll-wheel"></div></div>
                 <span>Scroll to explore</span>
-            </div>
+            </motion.div>
         </div>
     );
 };
@@ -647,25 +774,25 @@ const Skills = ({ data, settings }) => {
     };
 
     const gradients = [
-        'linear-gradient(135deg, #FF6A3D, #0A0A0A)',
-        'linear-gradient(135deg, #0A0A0A, #FF6A3D)',
-        'linear-gradient(135deg, #FFB26B, #141414)',
-        'linear-gradient(135deg, #141414, #FFB26B)',
+        'linear-gradient(135deg, hsl(var(--primary) / 0.4), #030712)',
+        'linear-gradient(135deg, #030712, hsl(var(--primary) / 0.4))',
+        'linear-gradient(135deg, hsl(var(--primary) / 0.3), #0f172a)',
+        'linear-gradient(135deg, #0f172a, hsl(var(--primary) / 0.3))',
     ];
 
     return (
         <div className="container">
-            <h2 className="section-heading"><span className="heading-num">02.</span>{settings.sectionTitles?.skills}<span className="heading-line"></span></h2>
+            <h2 className="section-heading">
+                <span className="heading-num">02.</span>
+                <RevealText text={settings.sectionTitles?.skills || ''} />
+                <span className="heading-line"></span>
+            </h2>
             <div className="skills-grid">
                 {Object.entries(data).map(([cat, skills], i) => (
-                    <motion.div
+                    <TiltCard
                         key={cat}
                         className="skill-card glass-card"
                         style={{ '--skill-gradient': gradients[i % gradients.length] }}
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.5, delay: i * 0.1 }}
                     >
                         <div className="skill-card-header">
                             <div className="skill-icon-wrap"><i className={`fas ${getIcon(cat)}`}></i></div>
@@ -685,7 +812,7 @@ const Skills = ({ data, settings }) => {
                                 </motion.span>
                             ))}
                         </div>
-                    </motion.div>
+                    </TiltCard>
                 ))}
             </div>
         </div>
@@ -755,7 +882,11 @@ const Projects = ({ settings, customProjects = [] }) => {
 
     return (
         <div className="container">
-            <h2 className="section-heading"><span className="heading-num">03.</span>{settings.sectionTitles?.projects}<span className="heading-line"></span></h2>
+            <h2 className="section-heading">
+                <span className="heading-num">03.</span>
+                <RevealText text={settings.sectionTitles?.projects || ''} />
+                <span className="heading-line"></span>
+            </h2>
             <div className="projects-search-bar">
                 <i className="fas fa-search"></i>
                 <input type="text" placeholder="Search projects by name, topic, or language..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
@@ -784,11 +915,12 @@ const Projects = ({ settings, customProjects = [] }) => {
                         <motion.div
                             key={p.name}
                             className="project-bar glass-card"
-                            onClick={() => window.open(`${p.url}/blob/HEAD/README.md`, '_blank')}
-                            initial={{ opacity: 0, x: -20 }}
-                            whileInView={{ opacity: 1, x: 0 }}
+                            onClick={() => window.open(p.url, '_blank')}
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            whileHover={{ scale: 1.02 }}
                             viewport={{ once: true }}
-                            transition={{ duration: 0.4, delay: i * 0.05 }}
+                            transition={{ duration: 0.5, delay: i * 0.05 }}
                         >
                             <div className="project-bar-body">
                                 <div className="project-bar-top">
@@ -824,11 +956,14 @@ const Projects = ({ settings, customProjects = [] }) => {
                                         </a>
                                     </div>
                                 </div>
-                                {p.description && <p>{p.description}</p>}
-                                {p.topics.length > 0 && (
-                                    <div className="project-bar-topics">{p.topics.map(t => <span key={t} className="project-topic-tag">{t}</span>)}</div>
-                                )}
+                                <div className="project-bar-expandable">
+                                    {p.description && <p>{p.description}</p>}
+                                    {p.topics.length > 0 && (
+                                        <div className="project-bar-topics">{p.topics.map(t => <span key={t} className="project-topic-tag">{t}</span>)}</div>
+                                    )}
+                                </div>
                             </div>
+                            <div className="project-hover-glow" />
                         </motion.div>
                     ))}
                     {filtered.length === 0 && (
@@ -848,14 +983,18 @@ const Experience = ({ data, settings }) => {
     if (!data) return null;
     return (
         <div className="container">
-            <h2 className="section-heading"><span className="heading-num">04.</span>{settings.sectionTitles?.experience}<span className="heading-line"></span></h2>
+            <h2 className="section-heading">
+                <span className="heading-num">04.</span>
+                <RevealText text={settings.sectionTitles?.experience || ''} />
+                <span className="heading-line"></span>
+            </h2>
             <div className="timeline">
                 {data.map((exp, i) => (
                     <motion.div
                         key={i}
                         className="timeline-item"
-                        initial={{ opacity: 0, x: -30 }}
-                        whileInView={{ opacity: 1, x: 0 }}
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true, amount: 0.3 }}
                         transition={{ duration: 0.6, delay: i * 0.15 }}
                     >
@@ -879,17 +1018,17 @@ const Certifications = ({ data, settings }) => {
     if (!data) return null;
     return (
         <div className="container">
-            <h2 className="section-heading"><span className="heading-num">05.</span>{settings.sectionTitles?.certifications}<span className="heading-line"></span></h2>
+            <h2 className="section-heading">
+                <span className="heading-num">05.</span>
+                <RevealText text={settings.sectionTitles?.certifications || ''} />
+                <span className="heading-line"></span>
+            </h2>
             <div className="certs-grid">
                 {data.map((cert, i) => (
-                    <motion.div
+                    <TiltCard
                         key={i}
                         className="cert-card glass-card"
                         onClick={() => window.open(cert.credentialUrl, '_blank')}
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.5, delay: i * 0.1 }}
                     >
                         <div className="cert-card-image" style={{ borderBottom: `3px solid ${cert.color || 'var(--lavender)'}` }}>
                             <CertImage src={cert.image} alt={cert.title} color={cert.color} />
@@ -900,7 +1039,7 @@ const Certifications = ({ data, settings }) => {
                             {cert.issueDate && <span className="cert-card-date"><i className="fas fa-calendar-alt"></i> {cert.issueDate}</span>}
                             <a href={cert.credentialUrl} target="_blank" className="cert-card-link" onClick={e => e.stopPropagation()} rel="noopener noreferrer">View Credential <i className="fas fa-external-link-alt"></i></a>
                         </div>
-                    </motion.div>
+                    </TiltCard>
                 ))}
             </div>
         </div>
@@ -943,7 +1082,11 @@ const Contact = ({ data, settings }) => {
     if (!data) return null;
     return (
         <div className="container">
-            <h2 className="section-heading"><span className="heading-num">06.</span>{settings.sectionTitles?.contact}<span className="heading-line"></span></h2>
+            <h2 className="section-heading">
+                <span className="heading-num">06.</span>
+                <RevealText text={settings.sectionTitles?.contact || ''} />
+                <span className="heading-line"></span>
+            </h2>
             <div className="contact-wrap">
                 <div className="contact-intro"><h3>{data.heading}</h3><p>{data.description}</p></div>
                 <div className="contact-cards">
@@ -975,12 +1118,25 @@ const Contact = ({ data, settings }) => {
 
 const Footer = ({ settings, data, onAdminClick }) => (
     <footer className="footer">
+        <MotionLayer speed={-0.05}>
+            <div className="footer-bg-glow" />
+        </MotionLayer>
         <div className="container">
             <div className="footer-content">
-                <div className="footer-brand">
+                <motion.div 
+                    className="footer-brand"
+                    whileInView={{ opacity: 1, y: 0 }}
+                    initial={{ opacity: 0, y: 20 }}
+                    viewport={{ once: true }}
+                >
                     <div className="footer-logo"><i className="fas fa-terminal"></i> {settings.logoText || 'Saketh'}</div>
                     <p className="footer-tagline">Building intelligent systems that solve real-world problems.</p>
-                </div>
+                    <div className="footer-cta-motion">
+                        <MagneticButton className="btn btn-primary" onClick={() => document.querySelector('#contact')?.scrollIntoView({ behavior: 'smooth' })}>
+                            Start a Project
+                        </MagneticButton>
+                    </div>
+                </motion.div>
                 <div className="footer-nav">
                     <h4>Quick Links</h4>
                     <div className="footer-nav-links">
@@ -996,7 +1152,16 @@ const Footer = ({ settings, data, onAdminClick }) => (
                     <h4>Connect</h4>
                     <div className="footer-links">
                         {data?.socialLinks?.map(s => (
-                            <a key={s.platform} href={s.url} target="_blank" rel="noopener noreferrer" aria-label={s.platform}><i className={s.icon}></i></a>
+                            <motion.a 
+                                key={s.platform} 
+                                href={s.url} 
+                                target="_blank" 
+                                rel="noopener noreferrer" 
+                                aria-label={s.platform}
+                                whileHover={{ scale: 1.2, rotate: 5 }}
+                            >
+                                <i className={s.icon}></i>
+                            </motion.a>
                         ))}
                     </div>
                 </div>
@@ -1018,5 +1183,13 @@ const BackToTop = ({ scrolled }) => (
         <i className="fas fa-chevron-up"></i>
     </button>
 );
+
+const MemoizedSpline = React.memo(() => (
+    <Spline
+        scene="https://prod.spline.design/Slk6b8kz3LRlKiyk/scene.splinecode"
+        className="w-full h-full"
+        style={{ filter: 'hue-rotate(180deg) brightness(0.8)' }}
+    />
+));
 
 export default App;
