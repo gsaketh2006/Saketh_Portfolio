@@ -716,17 +716,6 @@ const Hero = ({ data }) => {
                     }}
                 >
                     <div className="hero-avatar">
-                        <div className="avatar-glow"></div>
-                        <div className="avatar-circle-decoration">
-                            <svg viewBox="0 0 100 100">
-                                <path id="circlePath" d="M 50, 50 m -37, 0 a 37,37 0 1,1 74,0 a 37,37 0 1,1 -74,0" fill="transparent" />
-                                <text>
-                                    <textPath xlinkHref="#circlePath">
-                                        EVERY AMBITION REQUIRES PREPARATION &bull; EVERY AMBITION REQUIRES PREPARATION &bull;
-                                    </textPath>
-                                </text>
-                            </svg>
-                        </div>
                         {data.avatarImage ? (
                             <img src={data.avatarImage} alt="Profile" className="avatar-image" />
                         ) : (
