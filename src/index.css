@@ -702,12 +702,15 @@
   letter-spacing: -0.8px;
   margin-bottom: 8px;
   position: relative;
+}
+
+.hero-name-char {
   background: linear-gradient(90deg, #1D9E75 0%, #00b4d8 35%, #5DCAA5 70%, #1D9E75 100%);
   background-size: 300% auto;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  filter: drop-shadow(0 0 20px rgba(45, 212, 191, 0.45));
+  filter: drop-shadow(0 0 12px rgba(93, 202, 165, 0.35));
   animation: shineGradient 6s linear infinite;
 }
 

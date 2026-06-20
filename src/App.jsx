@@ -155,6 +155,12 @@ const Section = ({ children, id }) => (
     </motion.section>
 );
 
+const greetingText = "Hi, I'm";
+const nameString = "G.L.N.S.S.Saketh";
+const greetingChars = Array.from(greetingText);
+const nameChars = Array.from(nameString);
+const totalChars = greetingChars.length + 1 + nameChars.length; // +1 for space/newline
+
 const App = () => {
     const [data, setData] = useState(initialData);
     const [scrolled, setScrolled] = useState(false);
@@ -656,14 +662,8 @@ const Hero = ({ data, focusChatInput, chatInputRef }) => {
         }
     }, []);
 
-    const greetingText = "Hi, I'm";
-    const nameString = "G.L.N.S.S.Saketh";
     const fullNameString = (data.typingTexts && data.typingTexts.length > 0) ? data.typingTexts[0] : "G.L.N.S.S. Saketh";
     
-    // Separate greeting and name for two-line display
-    const greetingChars = Array.from(greetingText);
-    const nameChars = Array.from(nameString);
-    const totalChars = greetingChars.length + 1 + nameChars.length; // +1 for space/newline
 
     const [typedIndex, setTypedIndex] = useState(0);
 
@@ -993,6 +993,7 @@ Soft Skills: Problem Solving, Analytical Thinking, Communication, Team Collabora
                              {typedIndex > greetingChars.length && nameChars.slice(0, typedIndex - greetingChars.length - 1).map((char, i) => (
                                  <motion.span 
                                      key={`n-${i}`}
+                                     className="hero-name-char"
                                      initial={{ opacity: 0, scale: 0.5, y: 15, filter: 'blur(4px)' }}
                                      animate={{ opacity: 1, scale: 1, y: 0, filter: 'blur(0px)' }}
                                      transition={{ 
