@@ -657,7 +657,7 @@ const Hero = ({ data, focusChatInput, chatInputRef }) => {
     }, []);
 
     const greetingText = "Hi, I'm";
-    const nameString = "Saketh";
+    const nameString = "G.L.N.S.S.Saketh";
     const fullNameString = (data.typingTexts && data.typingTexts.length > 0) ? data.typingTexts[0] : "G.L.N.S.S. Saketh";
     
     // Separate greeting and name for two-line display
@@ -993,12 +993,18 @@ Soft Skills: Problem Solving, Analytical Thinking, Communication, Team Collabora
                              {typedIndex > greetingChars.length && nameChars.slice(0, typedIndex - greetingChars.length - 1).map((char, i) => (
                                  <motion.span 
                                      key={`n-${i}`}
-                                     initial={{ opacity: 0, scale: 0.8, y: 10 }}
-                                     animate={{ opacity: 1, scale: 1, y: 0 }}
-                                     transition={{ duration: 0.14 }}
+                                     initial={{ opacity: 0, scale: 0.5, y: 15, filter: 'blur(4px)' }}
+                                     animate={{ opacity: 1, scale: 1, y: 0, filter: 'blur(0px)' }}
+                                     transition={{ 
+                                         type: 'spring', 
+                                         stiffness: 260, 
+                                         damping: 18, 
+                                         delay: i * 0.01 
+                                     }}
                                      whileHover={{ 
-                                         scale: 1.12, 
-                                         y: -4
+                                         scale: 1.25, 
+                                         y: -8,
+                                         filter: 'brightness(1.2) drop-shadow(0 0 10px rgba(45, 212, 191, 0.6))',
                                      }} 
                                      style={{ 
                                          display: 'inline-block', 
