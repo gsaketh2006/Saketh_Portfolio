@@ -1732,7 +1732,6 @@ const Contact = ({ data, settings }) => {
                     viewport={{ once: true }}
                     transition={{ duration: 0.6 }}
                 >
-                    <h3>{data.heading || "Let's Work Together"}</h3>
                     <p>{data.description || "I'm always open to discussing new projects, creative ideas, or opportunities."}</p>
                 </motion.div>
                 <div className="contact-cards">

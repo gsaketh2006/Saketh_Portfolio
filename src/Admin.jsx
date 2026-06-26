@@ -895,7 +895,6 @@ const Admin = ({ data, onSave, onExit }) => {
                     {activeTab === 'contact' && editedData.contact && (
                         <div className="admin-section">
                             <h3><i className="fas fa-envelope"></i> Contact Info</h3>
-                            <div className="form-group"><label>Heading</label><input type="text" value={editedData.contact.heading} onChange={e => handleUpdate('contact', 'heading', e.target.value)} /></div>
                             <div className="form-group"><label>Description</label><textarea value={editedData.contact.description} onChange={e => handleUpdate('contact', 'description', e.target.value)} /></div>
                             <div className="form-grid">
                                 <div className="form-group"><label>Email</label><input type="text" value={editedData.contact.email?.value || ''} onChange={e => handleDeepUpdate('contact', 'email', 'value', e.target.value)} /></div>
