@@ -26,7 +26,7 @@ const About = ({ data, settings }) => {
                     transition={{ duration: 0.5 }}
                 >
                     <span className="section-label">{"01. about"}</span>
-                    <h2 className="section-title">{settings.sectionTitles?.about || "About Me"}</h2>
+                    <h2 className="section-title">The person behind</h2>
                 </motion.div>
 
                 <div className="about-grid-wrapper">

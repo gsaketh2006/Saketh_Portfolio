@@ -346,6 +346,7 @@ const App = () => {
                     settings={data.settings}
                     scrolled={scrolled}
                     activeSection={activeSection}
+                    resumeUrl={data.hero?.resumeUrl}
                 />
                 
                 <main>
@@ -378,7 +379,7 @@ const SideNav = ({ navLinks, activeSection }) => {
                     aria-label={`Go to ${link.text}`}
                     onClick={(e) => {
                         e.preventDefault();
-                        document.querySelector(link.href)?.scrollIntoView({ behavior: 'smooth' });
+                        document.getElementById(link.section)?.scrollIntoView({ behavior: 'smooth' });
                     }}
                 >
                     <span className="dot-label">{link.text.toLowerCase()}</span>
@@ -390,7 +391,7 @@ const SideNav = ({ navLinks, activeSection }) => {
 };
 
 // --- Navbar ---
-const Navbar = ({ settings, scrolled, activeSection }) => {
+const Navbar = ({ settings, scrolled, activeSection, resumeUrl }) => {
     const [navOpen, setNavOpen] = useState(false);
 
     useEffect(() => {
@@ -426,7 +427,7 @@ const Navbar = ({ settings, scrolled, activeSection }) => {
                                 style={activeSection === link.section ? { color: 'var(--accent-green)', position: 'relative' } : { position: 'relative' }}
                                 onClick={(e) => {
                                     e.preventDefault();
-                                    document.querySelector(link.href)?.scrollIntoView({ behavior: 'smooth' });
+                                    document.getElementById(link.section)?.scrollIntoView({ behavior: 'smooth' });
                                 }}
                             >
                                 {link.text.toLowerCase()}
@@ -454,7 +455,7 @@ const Navbar = ({ settings, scrolled, activeSection }) => {
 
                 <div className="nav-actions">
                     <a 
-                        href="https://drive.google.com/file/d/1YQUJ2OwS45eI9zgYpe3Q8lAh2O066iLL/view?usp=sharing" 
+                        href={resumeUrl || '#'} 
                         target="_blank"
                         rel="noopener noreferrer"
                         className="resume-btn-pill"
@@ -490,14 +491,14 @@ const Navbar = ({ settings, scrolled, activeSection }) => {
                                 onClick={(e) => {
                                     e.preventDefault();
                                     setNavOpen(false);
-                                    document.querySelector(link.href)?.scrollIntoView({ behavior: 'smooth' });
+                                    document.getElementById(link.section)?.scrollIntoView({ behavior: 'smooth' });
                                 }}
                             >
                                 {link.text.toLowerCase()}
                             </a>
                         ))}
                         <a 
-                            href="https://drive.google.com/file/d/1YQUJ2OwS45eI9zgYpe3Q8lAh2O066iLL/view?usp=sharing" 
+                            href={resumeUrl || '#'} 
                             target="_blank"
                             rel="noopener noreferrer"
                             className="nav-mobile-link resume-mobile"
@@ -871,6 +872,8 @@ const Hero = ({ data, focusChatInput, chatInputRef }) => {
                         {
                             role: 'system',
                             content: `You are Saketh, an AI & ML engineering student at SRM University-AP, Andhra Pradesh, India. Answer any question about yourself in first person, naturally and conversationally. Keep answers short (2-4 sentences max). You MUST ONLY answer questions by analyzing the following resume present in the database. DO NOT give random results or hallucinate. If you are asked something not in the resume, clearly state you don't have that information.
+                            
+If the user asks for your resume or CV, you MUST provide them with this link: ${data.resumeUrl || ''}
 
 Here is your exact resume text to use as your knowledge base:
 
@@ -993,7 +996,6 @@ Soft Skills: Problem Solving, Analytical Thinking, Communication, Team Collabora
                              {typedIndex > greetingChars.length && nameChars.slice(0, typedIndex - greetingChars.length - 1).map((char, i) => (
                                  <motion.span 
                                      key={`n-${i}`}
-                                     className="hero-name-char"
                                      initial={{ opacity: 0, scale: 0.5, y: 15, filter: 'blur(4px)' }}
                                      animate={{ opacity: 1, scale: 1, y: 0, filter: 'blur(0px)' }}
                                      transition={{ 
@@ -1013,7 +1015,14 @@ Soft Skills: Problem Solving, Analytical Thinking, Communication, Team Collabora
                                          cursor: 'default',
                                      }}
                                  >
-                                     {char}
+                                    <motion.span
+                                        className="hero-name-char"
+                                        animate={{ y: [0, -5, 0] }}
+                                        transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: i * 0.1 }}
+                                        style={{ display: 'inline-block' }}
+                                    >
+                                        {char}
+                                    </motion.span>
                                  </motion.span>
                              ))}
                              <span className="terminal-cursor" style={{ WebkitTextFillColor: 'var(--accent-green-light)', color: 'var(--accent-green-light)' }}>▋</span>
@@ -1075,33 +1084,7 @@ Soft Skills: Problem Solving, Analytical Thinking, Communication, Team Collabora
                                 </motion.button>
                             );
                         })}
-                        {(!data.buttons || data.buttons.length === 0) && (
-                            <>
-                                <motion.button 
-                                    className="btn-hero-primary"
-                                    onClick={(e) => {
-                                        e.preventDefault();
-                                        document.querySelector('#projects')?.scrollIntoView({ behavior: 'smooth' });
-                                    }}
-                                    whileHover={{ scale: 1.03, y: -2 }}
-                                    whileTap={{ scale: 0.95 }}
-                                    transition={{ type: 'spring', stiffness: 400, damping: 17 }}
-                                >
-                                    <span>view projects</span>
-                                    <i className="fas fa-code" style={{ marginLeft: '6px' }}></i>
-                                </motion.button>
-                                <motion.button 
-                                    className="btn-hero-secondary" 
-                                    onClick={focusChatInput}
-                                    whileHover={{ scale: 1.05, y: -2 }}
-                                    whileTap={{ scale: 0.95 }}
-                                    transition={{ type: 'spring', stiffness: 400, damping: 17 }}
-                                >
-                                    <span>chat with me</span>
-                                    <i className="fas fa-comment" style={{ marginLeft: '6px' }}></i>
-                                </motion.button>
-                            </>
-                        )}
+
                     </motion.div>
 
                     <motion.div 
@@ -1139,102 +1122,45 @@ Soft Skills: Problem Solving, Analytical Thinking, Communication, Team Collabora
                     </motion.div>
                 </div>
 
-                {/* COLUMN 2: CENTER PANEL */}
+                {/* COLUMN 2: CENTER PANEL (AI IDENTITY MODULE) */}
                 <div className="hero-center">
-                    <motion.div 
-                        className="hero-avatar-ring"
-                        initial={{ opacity: 0, scale: 0.85, rotate: -10, y: 0 }}
-                        animate={{ opacity: 1, scale: 1, rotate: 0, y: [0, -12, 0] }}
-                        transition={{ 
-                            default: { duration: 0.8, ease: [0.22, 1, 0.36, 1], delay: 0.2 },
-                            y: { duration: 4, repeat: Infinity, ease: "easeInOut", delay: 1 }
-                        }}
-                        whileHover={{ scale: 1.05, rotate: 3 }}
-                    >
-                        <div className="hero-avatar-inner" style={{ position: 'relative' }}>
+                    <div className="ai-identity-module">
+                        {/* Decorative Grid & Glow */}
+                        <div className="ai-module-bg-glow"></div>
+                        <div className="ai-module-grid"></div>
+
+                        {/* Orbital Rings */}
+                        <div className="orbital-ring ring-1"></div>
+                        <div className="orbital-ring ring-2"></div>
+                        <div className="orbital-ring ring-3"></div>
+
+                        {/* Core Profile Area */}
+                        <motion.div 
+                            className="ai-core-container"
+                            initial={{ scale: 0.8, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            transition={{ duration: 1.2, ease: "easeOut", delay: 0.3 }}
+                            whileHover={{ scale: 1.05 }}
+                        >
+                            <div className="scanner-line"></div>
                             {data.avatarImage ? (
-                                <>
-                                    <img src={data.avatarImage} alt="Saketh Profile" />
-                                    <div className="avatar-vignette"></div>
-                                </>
+                                <img src={data.avatarImage} alt="Core Profile" className="ai-core-image" />
                             ) : (
-                                <>
-                                    <span>S</span>
-                                    <div className="avatar-vignette"></div>
-                                </>
+                                <div className="ai-core-fallback">S</div>
                             )}
-                        </div>
-                    </motion.div>
-
-                    <motion.div 
-                        className="status-pill"
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.5, ease: "easeOut", delay: 0.4 }}
-                        whileHover={{ scale: 1.03 }}
-                    >
-                        <span className="status-dot"></span>
-                        <span>open to work</span>
-                    </motion.div>
-
-                    {/* Floating Code Snippet Widget */}
-                    <motion.div 
-                        className="floating-code-widget"
-                        initial={{ opacity: 0, y: 35, scale: 0.94, rotate: -3 }}
-                        animate={{ 
-                            opacity: 1, 
-                            y: [35, 0, 8, 0], 
-                            scale: [0.94, 1, 1, 1], 
-                            rotate: [-3, -3, -1, -3] 
-                        }}
-                        transition={{ 
-                            opacity: { duration: 0.8, ease: "easeOut", delay: 0.7 },
-                            y: {
-                                duration: 6,
-                                times: [0, 0.15, 0.5, 1],
-                                repeat: Infinity,
-                                ease: "easeInOut",
-                                delay: 1.5
-                            },
-                            rotate: {
-                                duration: 6,
-                                times: [0, 0.15, 0.5, 1],
-                                repeat: Infinity,
-                                ease: "easeInOut",
-                                delay: 1.5
-                            },
-                            scale: { duration: 0.8, ease: "easeOut", delay: 0.7 }
-                        }}
-                        whileHover={{ scale: 1.05, rotate: 1 }}
-                    >
-                        <div className="widget-header">
-                            <span className="dot dot-red"></span>
-                            <span className="dot dot-yellow"></span>
-                            <span className="dot dot-green"></span>
-                            <span className="widget-title">developer.json</span>
-                        </div>
-                        <pre className="widget-code">
-                            <code>
-                                <span className="code-punctuation">{'{'}</span>
-                                <br />
-                                <span className="code-key">&nbsp;&nbsp;&quot;name&quot;</span>
-                                <span className="code-punctuation">: </span>
-                                <span className="code-value">&quot;Saketh&quot;</span>
-                                <span className="code-punctuation">,</span>
-                                <br />
-                                <span className="code-key">&nbsp;&nbsp;&quot;role&quot;</span>
-                                <span className="code-punctuation">: </span>
-                                <span className="code-value">&quot;ML Engineer&quot;</span>
-                                <span className="code-punctuation">,</span>
-                                <br />
-                                <span className="code-key">&nbsp;&nbsp;&quot;focus&quot;</span>
-                                <span className="code-punctuation">: </span>
-                                <span className="code-value">&quot;AI &amp; CV&quot;</span>
-                                <br />
-                                <span className="code-punctuation">{'}'}</span>
-                            </code>
-                        </pre>
-                    </motion.div>
+                        </motion.div>
+                        
+                        <motion.div 
+                            className="status-pill futuristic-pill"
+                            initial={{ opacity: 0, y: 15 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.5, ease: "easeOut", delay: 1 }}
+                            whileHover={{ scale: 1.05 }}
+                        >
+                            <span className="status-dot cyan-pulse"></span>
+                            <span>{data.contact?.status || 'SYSTEM ONLINE'}</span>
+                        </motion.div>
+                    </div>
                 </div>
 
                 {/* COLUMN 3: CHAT PANEL */}
@@ -1338,39 +1264,6 @@ Soft Skills: Problem Solving, Analytical Thinking, Communication, Team Collabora
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 1.2, duration: 0.6 }}
             >
-                <div className="tech-tags-scroll-wrap" style={{ overflow: 'hidden', whiteSpace: 'nowrap', width: '100%' }}>
-                    <motion.div 
-                        style={{ display: 'inline-block' }}
-                        animate={{ x: ['0%', '-50%'] }} 
-                        transition={{ duration: 22, ease: 'linear', repeat: Infinity }}
-                    >
-                        {[
-                            ...[
-                                { name: 'Python', icon: 'fab fa-python' },
-                                { name: 'scikit-learn', icon: 'fas fa-brain' },
-                                { name: 'Flask', icon: 'fas fa-pepper-hot' },
-                                { name: 'Computer Vision', icon: 'fas fa-eye' },
-                                { name: 'MySQL', icon: 'fas fa-database' }
-                            ],
-                            ...[
-                                { name: 'Python', icon: 'fab fa-python' },
-                                { name: 'scikit-learn', icon: 'fas fa-brain' },
-                                { name: 'Flask', icon: 'fas fa-pepper-hot' },
-                                { name: 'Computer Vision', icon: 'fas fa-eye' },
-                                { name: 'MySQL', icon: 'fas fa-database' }
-                            ]
-                        ].map((tag, i) => (
-                            <span 
-                                key={`${tag.name}-${i}`} 
-                                className="tech-tag-mono"
-                                style={{ display: 'inline-block', marginRight: '16px' }}
-                            >
-                                <i className={tag.icon} style={{ marginRight: '6px' }}></i>
-                                {tag.name}
-                            </span>
-                        ))}
-                    </motion.div>
-                </div>
                 <motion.div 
                     className="scroll-hint-row"
                     animate={{ y: [0, 6, 0] }}
@@ -1416,7 +1309,7 @@ const Skills = ({ data, settings }) => {
                 transition={{ duration: 0.5 }}
             >
                 <span className="section-label">02. skills</span>
-                <h2 className="section-title">{settings.sectionTitles?.skills || 'Skills & Technologies'}</h2>
+                <h2 className="section-title">Technologies i work with</h2>
             </motion.div>
             
             <div className="skills-grid">
@@ -1485,21 +1378,15 @@ const Projects = ({ settings, customProjects = [] }) => {
                     isGitHub: true
                 }));
 
-                const filteredCustom = customProjects
-                    .filter(p => p.source === 'manual')
-                    .filter(p => p.is_visible !== false)
-                    .map(p => ({ ...p, isGitHub: false, topics: p.topics || [] }));
-
                 const filteredGithub = githubProjects.filter(repo => {
                     const override = customProjects.find(p => p.name === repo.name && p.source === 'github');
                     return !override || override.is_visible !== false;
                 }).map(p => ({ ...p, isGitHub: true }));
 
-                const merged = [...filteredCustom, ...filteredGithub];
-                setProjects(merged);
+                setProjects(filteredGithub);
             } catch (e) { 
-                console.error(e);
-                setProjects(customProjects.filter(p => p.is_visible !== false).map(p => ({ ...p, isGitHub: false, topics: p.topics || [] })));
+                console.error("Failed to load GitHub repos", e);
+                setProjects([]);
             }
         };
         fetchRepos();
@@ -1527,7 +1414,7 @@ const Projects = ({ settings, customProjects = [] }) => {
                 transition={{ duration: 0.5 }}
             >
                 <span className="section-label">03. projects</span>
-                <h2 className="section-title">{settings.sectionTitles?.projects || 'Featured Projects'}</h2>
+                <h2 className="section-title">Things I've built</h2>
             </motion.div>
 
             <div className="projects-search-bar">
@@ -1641,7 +1528,7 @@ const Experience = ({ data, settings }) => {
                 transition={{ duration: 0.5 }}
             >
                 <span className="section-label">04. experience</span>
-                <h2 className="section-title">{settings.sectionTitles?.experience || 'Experience'}</h2>
+                <h2 className="section-title">Where I've worked</h2>
             </motion.div>
             
             <div className="timeline" style={{ position: 'relative' }}>
@@ -1693,7 +1580,7 @@ const Certifications = ({ data, settings }) => {
                 transition={{ duration: 0.5 }}
             >
                 <span className="section-label">05. certifications</span>
-                <h2 className="section-title">{settings.sectionTitles?.certifications || 'Certifications'}</h2>
+                <h2 className="section-title">Credentials & achievements</h2>
             </motion.div>
 
             <div className="certs-grid" style={{ perspective: 1000 }}>
@@ -1765,7 +1652,7 @@ const Contact = ({ data, settings }) => {
                 transition={{ duration: 0.5 }}
             >
                 <span className="section-label">06. contact</span>
-                <h2 className="section-title">{settings.sectionTitles?.contact || 'Get In Touch'}</h2>
+                <h2 className="section-title">Let's Build Something Amazing Together.</h2>
             </motion.div>
 
             <div className="contact-wrap">
@@ -1780,7 +1667,7 @@ const Contact = ({ data, settings }) => {
                     <p>{data.description || "I'm always open to discussing new projects, creative ideas, or opportunities."}</p>
                 </motion.div>
                 <div className="contact-cards">
-                    {[data.email, data.phone, data.location].filter(Boolean).map((item, idx) => (
+                    {[data.email, data.phone].filter(Boolean).map((item, idx) => (
                         <motion.div 
                             key={item.label} 
                             className="contact-card"
@@ -1805,15 +1692,6 @@ const Contact = ({ data, settings }) => {
                         </motion.div>
                     ))}
                 </div>
-                {data.socialLinks?.length > 0 && (
-                    <div className="contact-socials">
-                        {data.socialLinks.map(s => (
-                            <a key={s.platform} href={s.url} target="_blank" rel="noopener noreferrer" aria-label={s.ariaLabel || s.platform}>
-                                <i className={s.icon}></i>
-                            </a>
-                        ))}
-                    </div>
-                )}
             </div>
         </div>
     );
@@ -1844,16 +1722,6 @@ const Footer = ({ settings, data, onAdminClick }) => (
                 >
                     <div className="footer-logo">saketh_</div>
                     <p className="footer-tagline">Building intelligent systems that solve real-world problems.</p>
-                    <div className="footer-cta-motion">
-                        <motion.button 
-                            className="btn" 
-                            onClick={() => document.querySelector('#contact')?.scrollIntoView({ behavior: 'smooth' })}
-                            whileHover={{ scale: 1.05, y: -2 }}
-                            whileTap={{ scale: 0.95 }}
-                        >
-                            start a project
-                        </motion.button>
-                    </div>
                 </motion.div>
                 <motion.div 
                     className="footer-nav"
@@ -1867,36 +1735,8 @@ const Footer = ({ settings, data, onAdminClick }) => (
                         {settings.navLinks?.slice(0, 4).map(link => (
                             <a key={link.section} href={link.href} onClick={(e) => {
                                 e.preventDefault();
-                                document.querySelector(link.href)?.scrollIntoView({ behavior: 'smooth' });
+                                document.getElementById(link.section)?.scrollIntoView({ behavior: 'smooth' });
                             }}>{link.text.toLowerCase()}</a>
-                        ))}
-                    </div>
-                </motion.div>
-                <motion.div 
-                    className="footer-social"
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.5, delay: 0.2 }}
-                >
-                    <h4>connect</h4>
-                    <div className="footer-links">
-                        {data?.socialLinks?.map((s, idx) => (
-                            <motion.a 
-                                key={s.platform} 
-                                href={s.url} 
-                                target="_blank" 
-                                rel="noopener noreferrer" 
-                                aria-label={s.platform}
-                                initial={{ opacity: 0, y: 10, scale: 0.8 }}
-                                whileInView={{ opacity: 1, y: 0, scale: 1 }}
-                                viewport={{ once: true }}
-                                transition={{ duration: 0.4, delay: 0.2 + idx * 0.08 }}
-                                whileHover={{ scale: 1.15, rotate: -5, y: -3 }}
-                                whileTap={{ scale: 0.9 }}
-                            >
-                                <i className={s.icon}></i>
-                            </motion.a>
                         ))}
                     </div>
                 </motion.div>

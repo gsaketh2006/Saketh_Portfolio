@@ -27,15 +27,27 @@
   <!-- Theme Color -->
   <meta name="theme-color" content="#0d0d0d" />
 
+  <link rel="stylesheet" href="/boot.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 
 <body>
+  <!-- Boot Screen Overlay -->
+  <div id="boot-screen">
+    <div id="boot-log-container"></div>
+  </div>
+
+  <!-- Mini Terminal -->
+  <div id="mini-terminal">
+    <div id="mini-terminal-log"></div>
+  </div>
+
   <div id="root"></div>
   <script type="module" src="/src/main.jsx"></script>
+  <script src="/boot.js"></script>
 </body>
 
 </html>

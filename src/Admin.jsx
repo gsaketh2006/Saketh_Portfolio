@@ -10,6 +10,7 @@ const Admin = ({ data, onSave, onExit }) => {
     const [saveFlash, setSaveFlash] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [projectSubTab, setProjectSubTab] = useState('active'); // 'active' or 'recycle'
+    const [adminProjectSearch, setAdminProjectSearch] = useState('');
     const [githubRepos, setGithubRepos] = useState([]);
     const [isLoadingGithub, setIsLoadingGithub] = useState(false);
 
@@ -271,13 +272,15 @@ const Admin = ({ data, onSave, onExit }) => {
                 }
             } catch (e) { errors.push(`Certifications: ${e.message}`); }
 
-            // 4. Sync Projects
+            // 4. Sync Projects (Only GitHub overrides)
             try {
                 await supabase.from('projects').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-                if (editedData.projects?.length > 0) {
+                
+                const githubOverrides = (editedData.projects || []).filter(p => p.source === 'github');
+                if (githubOverrides.length > 0) {
                     const { error: projError } = await supabase
                         .from('projects')
-                        .insert(editedData.projects.map((p, i) => ({ 
+                        .insert(githubOverrides.map((p, i) => ({ 
                             name: p.name || '',
                             description: p.description || '',
                             url: p.url || '',
@@ -593,7 +596,7 @@ const Admin = ({ data, onSave, onExit }) => {
                                 </button>
                             </div>
 
-                            <div className="admin-tabs-secondary" style={{ display: 'flex', gap: '10px', marginBottom: '20px', borderBottom: '1px solid var(--border-color)', paddingBottom: '10px' }}>
+                            <div className="admin-tabs-secondary" style={{ display: 'flex', gap: '10px', marginBottom: '15px', borderBottom: '1px solid var(--border-color)', paddingBottom: '10px' }}>
                                 <button 
                                     className={`admin-sub-tab ${projectSubTab === 'active' ? 'active' : ''}`} 
                                     onClick={() => setProjectSubTab('active')}
@@ -609,37 +612,30 @@ const Admin = ({ data, onSave, onExit }) => {
                                     Recycle Bin
                                 </button>
                             </div>
+                            
+                            <div style={{ marginBottom: '20px' }}>
+                                <input 
+                                    type="text" 
+                                    className="input-bold" 
+                                    style={{ width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'var(--bg-card)', color: 'var(--text-primary)' }} 
+                                    placeholder="Search GitHub Repositories..." 
+                                    value={adminProjectSearch}
+                                    onChange={e => setAdminProjectSearch(e.target.value)}
+                                />
+                            </div>
 
                             {projectSubTab === 'active' ? (
                                 <>
-                                    <p className="admin-hint">Displaying all active GitHub and Manual projects currently visible on your site.</p>
+                                    <p className="admin-hint">Displaying all active GitHub repositories currently visible on your portfolio.</p>
                                     
                                     <div className="admin-items-grid">
-                                        {/* 1. Manual Projects (Visible) */}
-                                        {editedData.projects?.filter(p => p.source === 'manual' && p.is_visible !== false).map((proj, idx) => {
-                                            const realIdx = editedData.projects.indexOf(proj);
-                                            return (
-                                                <div key={`manual-${idx}`} className="admin-item-card" style={{ borderLeft: '4px solid var(--accent)' }}>
-                                                    <div className="card-header-admin">
-                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                            <i className="fas fa-user-edit" title="Manual Project" style={{ color: 'var(--accent)', fontSize: '0.8rem' }}></i>
-                                                            <input type="text" className="input-bold" value={proj.name} onChange={e => handleArrayUpdate('projects', realIdx, 'name', e.target.value)} />
-                                                        </div>
-                                                        <button className="btn-delete" onClick={() => handleToggleVisibility(proj, 'manual')} title="Move to Recycle Bin">
-                                                            <i className="fas fa-trash"></i>
-                                                        </button>
-                                                    </div>
-                                                    <div className="form-group">
-                                                        <textarea value={proj.description} onChange={e => handleArrayUpdate('projects', realIdx, 'description', e.target.value)} placeholder="Short description..." />
-                                                    </div>
-                                                </div>
-                                            );
-                                        })}
-
-                                        {/* 2. GitHub Projects (Visible) */}
+                                        {/* GitHub Projects (Visible) */}
                                         {githubRepos.filter(repo => {
                                             const override = editedData.projects?.find(p => p.name === repo.name);
-                                            return !override || override.is_visible !== false;
+                                            const isVisible = !override || override.is_visible !== false;
+                                            const matchesSearch = repo.name.toLowerCase().includes(adminProjectSearch.toLowerCase()) || 
+                                                                  (repo.description && repo.description.toLowerCase().includes(adminProjectSearch.toLowerCase()));
+                                            return isVisible && matchesSearch;
                                         }).map((repo, idx) => (
                                             <div key={`github-${idx}`} className="admin-item-card" style={{ borderLeft: '4px solid #2ea44f', opacity: 0.9 }}>
                                                 <div className="card-header-admin">
@@ -658,29 +654,24 @@ const Admin = ({ data, onSave, onExit }) => {
                                             </div>
                                         ))}
                                     </div>
-
-                                    <button className="btn btn-outline full-width" style={{ marginTop: '20px' }} onClick={() => handleAddItem('projects', { name: 'New Project', description: '', url: '#', language: 'React', source: 'manual', is_visible: true })}>
-                                        <i className="fas fa-plus"></i> Add Custom Project
-                                    </button>
                                 </>
                             ) : (
                                 <>
-                                    <p className="admin-hint">Projects listed here are hidden from the frontend. You can restore them at any time.</p>
+                                    <p className="admin-hint">GitHub repositories listed here are hidden from the frontend. You can restore them at any time.</p>
                                     <div className="admin-items-grid">
-                                        {/* Hidden Projects (Both Source types) */}
-                                        {editedData.projects?.filter(p => p.is_visible === false).map((proj, idx) => {
-                                            const isGitHub = proj.source === 'github';
+                                        {/* Hidden GitHub Projects */}
+                                        {editedData.projects?.filter(p => p.source === 'github' && p.is_visible === false && (p.name.toLowerCase().includes(adminProjectSearch.toLowerCase()) || (p.description && p.description.toLowerCase().includes(adminProjectSearch.toLowerCase())))).map((proj, idx) => {
                                             return (
                                                 <div key={`hidden-${idx}`} className="admin-item-card" style={{ opacity: 0.7, borderStyle: 'dashed' }}>
                                                     <div className="card-header-admin">
                                                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                            <i className={isGitHub ? 'fab fa-github' : 'fas fa-user-edit'} style={{ color: isGitHub ? '#2ea44f' : 'var(--accent)' }}></i>
+                                                            <i className="fab fa-github" style={{ color: '#2ea44f' }}></i>
                                                             <span className="input-bold">{proj.name}</span>
                                                         </div>
                                                         <button 
                                                             className="btn btn-outline btn-sm" 
                                                             style={{ padding: '4px 8px', borderColor: 'var(--accent)', color: 'var(--accent)' }}
-                                                            onClick={() => handleToggleVisibility(proj, proj.source)}
+                                                            onClick={() => handleToggleVisibility(proj, 'github')}
                                                         >
                                                             <i className="fas fa-undo"></i> Restore
                                                         </button>
@@ -689,7 +680,7 @@ const Admin = ({ data, onSave, onExit }) => {
                                                 </div>
                                             );
                                         })}
-                                        {(!editedData.projects || editedData.projects.filter(p => p.is_visible === false).length === 0) && (
+                                        {(!editedData.projects || editedData.projects.filter(p => p.source === 'github' && p.is_visible === false).length === 0) && (
                                             <div className="projects-empty" style={{ gridColumn: '1 / -1', padding: '40px', textAlign: 'center' }}>
                                                 <i className="fas fa-trash-alt" style={{ fontSize: '2rem', color: '#333', marginBottom: '10px' }}></i>
                                                 <p>Your Recycle Bin is empty.</p>
