@@ -262,7 +262,17 @@ const Admin = ({ data, onSave, onExit }) => {
                 if (editedData.experience?.length > 0) {
                     const { error: expError } = await supabase
                         .from('experience')
-                        .insert(editedData.experience.map((exp, i) => ({ ...exp, order_index: i })));
+                        .insert(editedData.experience.map((exp, i) => ({
+                            title: exp.title || '',
+                            company: exp.company || '',
+                            date: exp.date || '',
+                            description: exp.description || '',
+                            achievements: exp.achievements || [],
+                            icon: exp.icon || 'fa-briefcase',
+                            color: exp.color || '',
+                            links: exp.links || [],
+                            order_index: i
+                        })));
                     if (expError) throw expError;
                 }
             } catch (e) { errors.push(`Experience: ${e.message}`); }
@@ -756,19 +766,21 @@ const Admin = ({ data, onSave, onExit }) => {
 
                                     {/* Links section */}
                                     <div className="form-group">
-                                        <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                            <span><i className="fas fa-link"></i> Links (GitHub, Live, Video, etc.)</span>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                                            <label style={{ margin: 0 }}><i className="fas fa-link"></i> Links (GitHub, Live, Video, etc.)</label>
                                             <button
+                                                type="button"
                                                 className="btn btn-outline btn-sm"
                                                 style={{ padding: '3px 10px', fontSize: '0.78rem' }}
-                                                onClick={() => {
+                                                onClick={(e) => {
+                                                    e.preventDefault();
                                                     const links = [...(exp.links || []), { type: 'GitHub', url: '' }];
                                                     handleArrayUpdate('experience', idx, 'links', links);
                                                 }}
                                             >
                                                 <i className="fas fa-plus"></i> Add Link
                                             </button>
-                                        </label>
+                                        </div>
                                         {(exp.links || []).map((link, lIdx) => (
                                             <div key={lIdx} style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '8px' }}>
                                                 <select
@@ -798,9 +810,11 @@ const Admin = ({ data, onSave, onExit }) => {
                                                     style={{ flex: 1, padding: '6px 10px', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'var(--bg-card)', color: 'var(--text-primary)', fontSize: '0.85rem' }}
                                                 />
                                                 <button
+                                                    type="button"
                                                     className="btn-delete"
                                                     style={{ padding: '4px 8px' }}
-                                                    onClick={() => {
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
                                                         const links = (exp.links || []).filter((_, i) => i !== lIdx);
                                                         handleArrayUpdate('experience', idx, 'links', links);
                                                     }}
@@ -811,7 +825,7 @@ const Admin = ({ data, onSave, onExit }) => {
                                             </div>
                                         ))}
                                         {(!exp.links || exp.links.length === 0) && (
-                                            <p style={{ fontSize: '0.8rem', color: '#666', margin: '4px 0' }}>No links added yet. Click "Add Link" to attach a GitHub repo, live demo, video, etc.</p>
+                                            <p style={{ fontSize: '0.8rem', color: '#666', margin: '4px 0' }}>No links added yet. Click "Add Link" above to attach a GitHub repo, live demo, video, etc.</p>
                                         )}
                                     </div>
                                 </div>
