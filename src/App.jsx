@@ -1578,24 +1578,32 @@ const Experience = ({ data, settings }) => {
                              {exp.links && exp.links.length > 0 && (
                                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '12px' }}>
                                      {exp.links.filter(l => l.url).map((link, lIdx) => {
-                                         const iconMap = {
-                                             GitHub: 'fab fa-github',
-                                             Live: 'fas fa-globe',
-                                             Video: 'fas fa-play-circle',
-                                             Report: 'fas fa-file-alt',
-                                             Link: 'fas fa-external-link-alt',
-                                             Other: 'fas fa-external-link-alt',
-                                         };
-                                         const labelMap = {
+                                         const standardLabels = {
                                              GitHub: 'GitHub',
                                              Live: 'Live Demo',
                                              Video: 'Watch Video',
                                              Report: 'View Report',
                                              Link: 'Visit Link',
-                                             Other: 'Visit Link',
+                                             Other: 'Visit Link'
                                          };
-                                         const icon = iconMap[link.type] || 'fas fa-external-link-alt';
-                                         const label = labelMap[link.type] || 'Visit Link';
+                                         const label = standardLabels[link.type] || link.type || 'Visit Link';
+
+                                         // Dynamic icon assignment based on type label or URL
+                                         const lowerType = (link.type || '').toLowerCase();
+                                         const lowerUrl = (link.url || '').toLowerCase();
+                                         let icon = 'fas fa-external-link-alt';
+
+                                         if (lowerType.includes('github') || lowerUrl.includes('github.com')) {
+                                             icon = 'fab fa-github';
+                                         } else if (lowerType.includes('video') || lowerType.includes('youtube') || lowerType.includes('loom') || lowerUrl.includes('youtube.com') || lowerUrl.includes('youtu.be') || lowerUrl.includes('loom.com')) {
+                                             icon = 'fas fa-play-circle';
+                                         } else if (lowerType.includes('report') || lowerType.includes('paper') || lowerType.includes('doc') || lowerType.includes('pdf') || lowerUrl.includes('drive.google.com/document') || lowerUrl.includes('.pdf') || lowerUrl.includes('arxiv.org')) {
+                                             icon = 'fas fa-file-alt';
+                                         } else if (lowerType.includes('live') || lowerType.includes('site') || lowerType.includes('web') || lowerType.includes('demo')) {
+                                             icon = 'fas fa-globe';
+                                         } else if (lowerUrl) {
+                                             icon = 'fas fa-external-link-alt';
+                                         }
                                          return (
                                              <a
                                                  key={lIdx}
