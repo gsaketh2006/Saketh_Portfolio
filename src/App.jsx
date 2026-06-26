@@ -514,8 +514,16 @@ const Navbar = ({ settings, scrolled, activeSection, resumeUrl }) => {
 };
 
 // --- Fallback Chat Responses for Claude ---
-const getFallbackChatResponse = (message) => {
+const getFallbackChatResponse = (message, resumeUrl) => {
     const msg = message.toLowerCase().trim();
+    
+    if (msg.includes('resume') || msg.includes('cv') || msg.includes('curriculum vitae')) {
+        if (resumeUrl) {
+            return `Sure! You can view and download my resume here: ${resumeUrl}`;
+        } else {
+            return "I haven't uploaded my resume link in the admin settings yet, but you can reach out to me at guggilamsaketh@gmail.com to request it!";
+        }
+    }
     
     if (msg.includes('hello') || msg.includes('hi') || msg.includes('hey') || msg.includes('greetings')) {
         return "Hi there! I'm Saketh. I'm an AI & ML Engineering student at SRM University-AP. Feel free to ask me anything about my projects, skills, or experience!";
@@ -847,7 +855,7 @@ const Hero = ({ data, focusChatInput, chatInputRef }) => {
             if (!apiKey) {
                 // If API Key not set, fallback to simulated responder immediately
                 setTimeout(() => {
-                    const fallbackReply = getFallbackChatResponse(query);
+                    const fallbackReply = getFallbackChatResponse(query, data.resumeUrl);
                     setChatHistory(prev => [...prev, { id: Date.now() + 1, sender: 'saketh', text: fallbackReply }].slice(-10));
                     setIsTyping(false);
                 }, 1000);
@@ -935,7 +943,7 @@ Soft Skills: Problem Solving, Analytical Thinking, Communication, Team Collabora
             // Fallback securely and elegantly
             setTimeout(() => {
                 try {
-                    const fallbackReply = getFallbackChatResponse(query);
+                    const fallbackReply = getFallbackChatResponse(query, data.resumeUrl);
                     setChatHistory(prev => [...prev, { id: Date.now() + 1, sender: 'saketh', text: fallbackReply }].slice(-10));
                 } catch {
                     setChatHistory(prev => [...prev, { id: Date.now() + 1, sender: 'saketh', text: "Sorry, something went wrong. Let's try again!" }]);
