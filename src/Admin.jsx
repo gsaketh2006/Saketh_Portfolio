@@ -764,66 +764,37 @@ const Admin = ({ data, onSave, onExit }) => {
                                         />
                                     </div>
 
-                                    {/* Action Buttons / Links */}
+                                    {/* Links section */}
                                     <div className="form-group">
-                                        <label><i className="fas fa-link"></i> Action Buttons (shown on frontend)</label>
-
-                                        {/* Column headers */}
-                                        <div style={{ display: 'grid', gridTemplateColumns: '140px 1fr 36px', gap: '8px', marginBottom: '4px' }}>
-                                            <span style={{ fontSize: '0.75rem', color: '#888' }}>Button Label</span>
-                                            <span style={{ fontSize: '0.75rem', color: '#888' }}>URL (paste link here)</span>
-                                            <span></span>
-                                        </div>
-
-                                        {/* Link rows */}
-                                        {(exp.links || []).map((link, lIdx) => (
-                                            <div key={lIdx} style={{ display: 'grid', gridTemplateColumns: '140px 1fr 36px', gap: '8px', marginBottom: '8px', alignItems: 'center' }}>
-                                                <input
-                                                    type="text"
-                                                    placeholder="e.g. GitHub"
-                                                    value={link.label || link.type || ''}
-                                                    onChange={e => {
-                                                        const links = [...(exp.links || [])];
-                                                        links[lIdx] = { ...links[lIdx], label: e.target.value };
-                                                        handleArrayUpdate('experience', idx, 'links', links);
-                                                    }}
-                                                    style={{ padding: '7px 10px', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'var(--bg-card)', color: 'var(--text-primary)', fontSize: '0.85rem' }}
-                                                />
-                                                <input
-                                                    type="url"
-                                                    placeholder="https://github.com/..."
-                                                    value={link.url || ''}
-                                                    onChange={e => {
-                                                        const links = [...(exp.links || [])];
-                                                        links[lIdx] = { ...links[lIdx], url: e.target.value };
-                                                        handleArrayUpdate('experience', idx, 'links', links);
-                                                    }}
-                                                    style={{ padding: '7px 10px', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'var(--bg-card)', color: 'var(--text-primary)', fontSize: '0.85rem' }}
-                                                />
-                                                <button
-                                                    type="button"
-                                                    className="btn-delete"
-                                                    style={{ padding: '6px 8px' }}
-                                                    onClick={() => {
-                                                        const links = (exp.links || []).filter((_, i) => i !== lIdx);
-                                                        handleArrayUpdate('experience', idx, 'links', links);
-                                                    }}
-                                                    title="Remove"
-                                                ><i className="fas fa-times"></i></button>
-                                            </div>
-                                        ))}
-
-                                        <button
-                                            type="button"
-                                            className="btn btn-outline btn-sm"
-                                            style={{ width: '100%', marginTop: '6px' }}
-                                            onClick={() => {
-                                                const links = [...(exp.links || []), { label: '', url: '' }];
-                                                handleArrayUpdate('experience', idx, 'links', links);
+                                        <label><i className="fas fa-link"></i> Link URL (GitHub, Live website, or video)</label>
+                                        <input
+                                            type="url"
+                                            placeholder="https://..."
+                                            value={exp.links && exp.links[0] ? exp.links[0].url : ''}
+                                            onChange={e => {
+                                                const url = e.target.value;
+                                                let type = 'Link';
+                                                const lower = url.toLowerCase();
+                                                if (lower.includes('github.com')) {
+                                                    type = 'GitHub';
+                                                } else if (lower.includes('youtube.com') || lower.includes('youtu.be') || lower.includes('vimeo.com') || lower.includes('drive.google.com/file') || lower.includes('loom.com')) {
+                                                    type = 'Video';
+                                                } else if (lower.includes('drive.google.com/document') || lower.includes('pdf') || lower.includes('arxiv.org')) {
+                                                    type = 'Report';
+                                                } else if (url) {
+                                                    type = 'Live';
+                                                }
+                                                const updatedLinks = url ? [{ type, url }] : [];
+                                                handleArrayUpdate('experience', idx, 'links', updatedLinks);
                                             }}
-                                        >
-                                            <i className="fas fa-plus"></i> Add Link
-                                        </button>
+                                            style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--bg-card)', color: 'var(--text-primary)', marginTop: '4px' }}
+                                        />
+                                        {exp.links && exp.links[0] && exp.links[0].url && (
+                                            <div style={{ marginTop: '6px', fontSize: '0.8rem', color: 'var(--accent-green)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                <i className="fas fa-check-circle"></i>
+                                                <span>Detected as <strong>{exp.links[0].type}</strong> link. Will show as a "{exp.links[0].type}" button on front page.</span>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             ))}

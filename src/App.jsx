@@ -1575,40 +1575,51 @@ const Experience = ({ data, settings }) => {
                                     {exp.achievements.map((a, j) => <li key={j}>{a}</li>)}
                                 </ul>
                             )}
-                            {exp.links && exp.links.filter(l => l.url).length > 0 && (
-                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '12px' }}>
-                                    {exp.links.filter(l => l.url).map((link, lIdx) => {
-                                        const text = (link.label || link.type || 'Link').trim();
-                                        const lower = text.toLowerCase();
-                                        let icon = 'fas fa-external-link-alt';
-                                        if (lower.includes('github'))   icon = 'fab fa-github';
-                                        else if (lower.includes('live') || lower.includes('demo') || lower.includes('site') || lower.includes('web')) icon = 'fas fa-globe';
-                                        else if (lower.includes('video') || lower.includes('youtube') || lower.includes('watch')) icon = 'fas fa-play-circle';
-                                        else if (lower.includes('report') || lower.includes('paper') || lower.includes('doc')) icon = 'fas fa-file-alt';
-                                        return (
-                                            <a
-                                                key={lIdx}
-                                                href={link.url}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                style={{
-                                                    display: 'inline-flex', alignItems: 'center', gap: '6px',
-                                                    padding: '5px 14px', borderRadius: '20px', fontSize: '0.78rem',
-                                                    fontWeight: '600', textDecoration: 'none',
-                                                    border: '1px solid var(--accent-green)',
-                                                    color: 'var(--accent-green)',
-                                                    background: 'rgba(0,255,102,0.06)',
-                                                    transition: 'background 0.2s, color 0.2s',
-                                                }}
-                                                onMouseEnter={e => { e.currentTarget.style.background = 'var(--accent-green)'; e.currentTarget.style.color = '#000'; }}
-                                                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(0,255,102,0.06)'; e.currentTarget.style.color = 'var(--accent-green)'; }}
-                                            >
-                                                <i className={icon}></i> {text}
-                                            </a>
-                                        );
-                                    })}
-                                </div>
-                            )}
+                             {exp.links && exp.links.length > 0 && (
+                                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '12px' }}>
+                                     {exp.links.filter(l => l.url).map((link, lIdx) => {
+                                         const iconMap = {
+                                             GitHub: 'fab fa-github',
+                                             Live: 'fas fa-globe',
+                                             Video: 'fas fa-play-circle',
+                                             Report: 'fas fa-file-alt',
+                                             Link: 'fas fa-external-link-alt',
+                                             Other: 'fas fa-external-link-alt',
+                                         };
+                                         const labelMap = {
+                                             GitHub: 'GitHub',
+                                             Live: 'Live Demo',
+                                             Video: 'Watch Video',
+                                             Report: 'View Report',
+                                             Link: 'Visit Link',
+                                             Other: 'Visit Link',
+                                         };
+                                         const icon = iconMap[link.type] || 'fas fa-external-link-alt';
+                                         const label = labelMap[link.type] || 'Visit Link';
+                                         return (
+                                             <a
+                                                 key={lIdx}
+                                                 href={link.url}
+                                                 target="_blank"
+                                                 rel="noopener noreferrer"
+                                                 style={{
+                                                     display: 'inline-flex', alignItems: 'center', gap: '6px',
+                                                     padding: '5px 12px', borderRadius: '20px', fontSize: '0.78rem',
+                                                     fontWeight: '600', textDecoration: 'none',
+                                                     border: '1px solid var(--accent-green)',
+                                                     color: 'var(--accent-green)',
+                                                     background: 'rgba(0,255,102,0.06)',
+                                                     transition: 'background 0.2s, color 0.2s',
+                                                 }}
+                                                 onMouseEnter={e => { e.currentTarget.style.background = 'var(--accent-green)'; e.currentTarget.style.color = '#000'; }}
+                                                 onMouseLeave={e => { e.currentTarget.style.background = 'rgba(0,255,102,0.06)'; e.currentTarget.style.color = 'var(--accent-green)'; }}
+                                             >
+                                                 <i className={icon}></i> {label}
+                                             </a>
+                                         );
+                                     })}
+                                 </div>
+                             )}
                         </div>
                     </motion.div>
                 ))}
