@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS experience (
     achievements TEXT[] DEFAULT '{}',
     icon TEXT DEFAULT 'fa-briefcase',
     color TEXT DEFAULT '#FF6A3D',
+    links JSONB DEFAULT '[]'::jsonb,
     order_index INT DEFAULT 0,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -49,7 +50,7 @@ CREATE TABLE IF NOT EXISTS skills (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- 5. Create Projects Table (Manual Projects)
+-- 5. Create Projects Table (Manual and GitHub Projects)
 CREATE TABLE IF NOT EXISTS projects (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name TEXT NOT NULL,
@@ -57,6 +58,10 @@ CREATE TABLE IF NOT EXISTS projects (
     url TEXT,
     language TEXT,
     image_url TEXT,
+    is_visible BOOLEAN DEFAULT TRUE,
+    source TEXT DEFAULT 'manual',
+    github_id TEXT,
+    display_order INT,
     order_index INT DEFAULT 0,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
