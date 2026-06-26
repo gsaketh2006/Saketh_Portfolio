@@ -62,6 +62,21 @@ const Admin = ({ data, onSave, onExit }) => {
         });
     };
 
+    const handleSetOrder = (projectName, orderValue) => {
+        setEditedData(prev => {
+            const projects = [...(prev.projects || [])];
+            const existingIdx = projects.findIndex(p => p.name === projectName);
+            const order = orderValue === '' ? null : parseInt(orderValue, 10);
+            if (existingIdx >= 0) {
+                projects[existingIdx] = { ...projects[existingIdx], display_order: order };
+            } else {
+                projects.push({ name: projectName, source: 'github', is_visible: true, display_order: order });
+            }
+            return { ...prev, projects };
+        });
+    };
+
+
     // --- Core Data Handlers ---
     const handleUpdate = (section, field, value) => {
         setEditedData(prev => ({
@@ -289,6 +304,7 @@ const Admin = ({ data, onSave, onExit }) => {
                             is_visible: p.is_visible !== false,
                             source: p.source || 'manual',
                             github_id: p.github_id || null,
+                            display_order: p.display_order ?? null,
                             order_index: i 
                         })));
                     if (projError) {
@@ -636,7 +652,10 @@ const Admin = ({ data, onSave, onExit }) => {
                                             const matchesSearch = repo.name.toLowerCase().includes(adminProjectSearch.toLowerCase()) || 
                                                                   (repo.description && repo.description.toLowerCase().includes(adminProjectSearch.toLowerCase()));
                                             return isVisible && matchesSearch;
-                                        }).map((repo, idx) => (
+                                        }).map((repo, idx) => {
+                                            const override = editedData.projects?.find(p => p.name === repo.name);
+                                            const currentOrder = override?.display_order ?? '';
+                                            return (
                                             <div key={`github-${idx}`} className="admin-item-card" style={{ borderLeft: '4px solid #2ea44f', opacity: 0.9 }}>
                                                 <div className="card-header-admin">
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -648,11 +667,27 @@ const Admin = ({ data, onSave, onExit }) => {
                                                     </button>
                                                 </div>
                                                 <p style={{ fontSize: '0.85rem', color: '#888', margin: '5px 0' }}>{repo.description || 'No description provided.'}</p>
-                                                <div className="admin-item-footer" style={{ fontSize: '0.75rem', color: 'var(--accent)', marginTop: '5px' }}>
+                                                <div className="admin-item-footer" style={{ fontSize: '0.75rem', color: 'var(--accent)', marginTop: '5px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                                                     <span><i className="fas fa-code"></i> {repo.language || 'Plain Text'}</span>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                        <label style={{ color: '#aaa', fontSize: '0.75rem' }}>Position:</label>
+                                                        <input
+                                                            type="number"
+                                                            min="1"
+                                                            placeholder="—"
+                                                            value={currentOrder}
+                                                            onChange={e => handleSetOrder(repo.name, e.target.value)}
+                                                            style={{
+                                                                width: '54px', padding: '3px 6px', borderRadius: '4px',
+                                                                border: '1px solid var(--border-color)', background: 'var(--bg-card)',
+                                                                color: 'var(--text-primary)', fontSize: '0.8rem', textAlign: 'center'
+                                                            }}
+                                                        />
+                                                    </div>
                                                 </div>
                                             </div>
-                                        ))}
+                                            );
+                                        })}
                                     </div>
                                 </>
                             ) : (

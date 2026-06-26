@@ -1392,7 +1392,14 @@ const Projects = ({ settings, customProjects = [] }) => {
                     return !override || override.is_visible !== false;
                 }).map(p => ({ ...p, isGitHub: true }));
 
-                setProjects(filteredGithub);
+                const sortedProjects = filteredGithub.sort((a, b) => {
+                    const overrideA = customProjects.find(p => p.name === a.name);
+                    const overrideB = customProjects.find(p => p.name === b.name);
+                    const orderA = overrideA?.display_order ?? Infinity;
+                    const orderB = overrideB?.display_order ?? Infinity;
+                    return orderA - orderB;
+                });
+                setProjects(sortedProjects);
             } catch (e) { 
                 console.error("Failed to load GitHub repos", e);
                 setProjects([]);
