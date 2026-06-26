@@ -891,7 +891,7 @@ Phone: +91 9490000736 | Email: guggilamsaketh@gmail.com | Location: Guntur, AP, 
 
 EDUCATION
 SRM University, AP (Aug 2023 – Present)
-B.Tech in Computer Science & Engineering (AI & ML) | CGPA : 8.77 (Till Semester 5)
+B.Tech in Computer Science & Engineering (AI & ML) | CGPA : 8.72 (Till Semester 5)
 
 EXPERIENCE
 SRM University, AP — Summer Research Intern (Remote, Jun 2025 – Aug 2025)
