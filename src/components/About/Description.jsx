@@ -10,12 +10,7 @@ const Description = ({ title, description }) => {
             viewport={{ once: true }}
             transition={{ duration: 0.7 }}
         >
-            <div className="about-icon-badge">
-                <i className="fas fa-user-astronaut"></i>
-            </div>
-            
             <div className="about-header">
-                <span className="about-subtitle">The Story</span>
                 <h3 className="about-title">{title}</h3>
             </div>
             
