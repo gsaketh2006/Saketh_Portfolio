@@ -10,9 +10,7 @@ const Description = ({ title, description }) => {
             viewport={{ once: true }}
             transition={{ duration: 0.7 }}
         >
-            <div className="about-header">
-                <h3 className="about-title">{title}</h3>
-            </div>
+
             
             <div className="about-text-container">
                 {description?.split('\n').filter(p => p.trim()).map((paragraph, index) => (
