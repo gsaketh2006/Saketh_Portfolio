@@ -119,6 +119,8 @@ async function startBootSequence() {
   // Mark as booted for this session
   sessionStorage.setItem('sos_os_booted', 'true');
   
+  // Scroll to top to ensure home section is showing first
+  window.scrollTo(0, 0);
   // Slide up to reveal portfolio
   bootScreen.classList.add('boot-fade-out');
   
