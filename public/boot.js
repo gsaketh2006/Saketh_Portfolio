@@ -47,6 +47,7 @@ async function startBootSequence() {
 
   if (shouldSkipBoot()) {
     bootScreen.style.display = 'none';
+    document.getElementById('root')?.classList.add('boot-done');
     initMiniTerminal();
     return;
   }
@@ -127,6 +128,7 @@ async function startBootSequence() {
   // Let the CSS animation finish then hide and init terminal
   setTimeout(() => {
     bootScreen.style.display = 'none';
+    document.getElementById('root')?.classList.add('boot-done');
     initMiniTerminal();
   }, 1000);
 }
