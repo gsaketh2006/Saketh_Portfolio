@@ -1167,7 +1167,7 @@ Soft Skills: Problem Solving, Analytical Thinking, Communication, Team Collabora
                             whileHover={{ scale: 1.05 }}
                         >
                             <span className="status-dot cyan-pulse"></span>
-                            <span>{data.hero?.badgeText || 'SYSTEM ONLINE'}</span>
+                            <span>{data.badgeText || 'SYSTEM ONLINE'}</span>
                         </motion.div>
                     </div>
                 </div>
