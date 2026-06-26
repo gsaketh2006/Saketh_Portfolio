@@ -764,69 +764,66 @@ const Admin = ({ data, onSave, onExit }) => {
                                         />
                                     </div>
 
-                                    {/* Links section */}
+                                    {/* Action Buttons / Links */}
                                     <div className="form-group">
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                                            <label style={{ margin: 0 }}><i className="fas fa-link"></i> Links (GitHub, Live, Video, etc.)</label>
-                                            <button
-                                                type="button"
-                                                className="btn btn-outline btn-sm"
-                                                style={{ padding: '3px 10px', fontSize: '0.78rem' }}
-                                                onClick={(e) => {
-                                                    e.preventDefault();
-                                                    const links = [...(exp.links || []), { type: 'GitHub', url: '' }];
-                                                    handleArrayUpdate('experience', idx, 'links', links);
-                                                }}
-                                            >
-                                                <i className="fas fa-plus"></i> Add Link
-                                            </button>
+                                        <label><i className="fas fa-link"></i> Action Buttons (shown on frontend)</label>
+
+                                        {/* Column headers */}
+                                        <div style={{ display: 'grid', gridTemplateColumns: '140px 1fr 36px', gap: '8px', marginBottom: '4px' }}>
+                                            <span style={{ fontSize: '0.75rem', color: '#888' }}>Button Label</span>
+                                            <span style={{ fontSize: '0.75rem', color: '#888' }}>URL (paste link here)</span>
+                                            <span></span>
                                         </div>
+
+                                        {/* Link rows */}
                                         {(exp.links || []).map((link, lIdx) => (
-                                            <div key={lIdx} style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '8px' }}>
-                                                <select
-                                                    value={link.type || 'GitHub'}
+                                            <div key={lIdx} style={{ display: 'grid', gridTemplateColumns: '140px 1fr 36px', gap: '8px', marginBottom: '8px', alignItems: 'center' }}>
+                                                <input
+                                                    type="text"
+                                                    placeholder="e.g. GitHub"
+                                                    value={link.label || link.type || ''}
                                                     onChange={e => {
                                                         const links = [...(exp.links || [])];
-                                                        links[lIdx] = { ...links[lIdx], type: e.target.value };
+                                                        links[lIdx] = { ...links[lIdx], label: e.target.value };
                                                         handleArrayUpdate('experience', idx, 'links', links);
                                                     }}
-                                                    style={{ padding: '6px 8px', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'var(--bg-card)', color: 'var(--text-primary)', fontSize: '0.85rem', flexShrink: 0 }}
-                                                >
-                                                    <option>GitHub</option>
-                                                    <option>Live</option>
-                                                    <option>Video</option>
-                                                    <option>Report</option>
-                                                    <option>Other</option>
-                                                </select>
+                                                    style={{ padding: '7px 10px', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'var(--bg-card)', color: 'var(--text-primary)', fontSize: '0.85rem' }}
+                                                />
                                                 <input
                                                     type="url"
-                                                    placeholder="https://..."
+                                                    placeholder="https://github.com/..."
                                                     value={link.url || ''}
                                                     onChange={e => {
                                                         const links = [...(exp.links || [])];
                                                         links[lIdx] = { ...links[lIdx], url: e.target.value };
                                                         handleArrayUpdate('experience', idx, 'links', links);
                                                     }}
-                                                    style={{ flex: 1, padding: '6px 10px', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'var(--bg-card)', color: 'var(--text-primary)', fontSize: '0.85rem' }}
+                                                    style={{ padding: '7px 10px', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'var(--bg-card)', color: 'var(--text-primary)', fontSize: '0.85rem' }}
                                                 />
                                                 <button
                                                     type="button"
                                                     className="btn-delete"
-                                                    style={{ padding: '4px 8px' }}
-                                                    onClick={(e) => {
-                                                        e.preventDefault();
+                                                    style={{ padding: '6px 8px' }}
+                                                    onClick={() => {
                                                         const links = (exp.links || []).filter((_, i) => i !== lIdx);
                                                         handleArrayUpdate('experience', idx, 'links', links);
                                                     }}
-                                                    title="Remove link"
-                                                >
-                                                    <i className="fas fa-times"></i>
-                                                </button>
+                                                    title="Remove"
+                                                ><i className="fas fa-times"></i></button>
                                             </div>
                                         ))}
-                                        {(!exp.links || exp.links.length === 0) && (
-                                            <p style={{ fontSize: '0.8rem', color: '#666', margin: '4px 0' }}>No links added yet. Click "Add Link" above to attach a GitHub repo, live demo, video, etc.</p>
-                                        )}
+
+                                        <button
+                                            type="button"
+                                            className="btn btn-outline btn-sm"
+                                            style={{ width: '100%', marginTop: '6px' }}
+                                            onClick={() => {
+                                                const links = [...(exp.links || []), { label: '', url: '' }];
+                                                handleArrayUpdate('experience', idx, 'links', links);
+                                            }}
+                                        >
+                                            <i className="fas fa-plus"></i> Add Link
+                                        </button>
                                     </div>
                                 </div>
                             ))}
