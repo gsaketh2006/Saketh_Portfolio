@@ -1575,6 +1575,41 @@ const Experience = ({ data, settings }) => {
                                     {exp.achievements.map((a, j) => <li key={j}>{a}</li>)}
                                 </ul>
                             )}
+                            {exp.links && exp.links.length > 0 && (
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '12px' }}>
+                                    {exp.links.filter(l => l.url).map((link, lIdx) => {
+                                        const iconMap = {
+                                            GitHub: 'fab fa-github',
+                                            Live: 'fas fa-globe',
+                                            Video: 'fas fa-play-circle',
+                                            Report: 'fas fa-file-alt',
+                                            Other: 'fas fa-external-link-alt',
+                                        };
+                                        const icon = iconMap[link.type] || 'fas fa-external-link-alt';
+                                        return (
+                                            <a
+                                                key={lIdx}
+                                                href={link.url}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                style={{
+                                                    display: 'inline-flex', alignItems: 'center', gap: '6px',
+                                                    padding: '5px 12px', borderRadius: '20px', fontSize: '0.78rem',
+                                                    fontWeight: '600', textDecoration: 'none',
+                                                    border: '1px solid var(--accent-green)',
+                                                    color: 'var(--accent-green)',
+                                                    background: 'rgba(0,255,102,0.06)',
+                                                    transition: 'background 0.2s, color 0.2s',
+                                                }}
+                                                onMouseEnter={e => { e.currentTarget.style.background = 'var(--accent-green)'; e.currentTarget.style.color = '#000'; }}
+                                                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(0,255,102,0.06)'; e.currentTarget.style.color = 'var(--accent-green)'; }}
+                                            >
+                                                <i className={icon}></i> {link.type}
+                                            </a>
+                                        );
+                                    })}
+                                </div>
+                            )}
                         </div>
                     </motion.div>
                 ))}
