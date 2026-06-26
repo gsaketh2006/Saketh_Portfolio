@@ -2691,10 +2691,14 @@
   margin-bottom: 24px;
 }
 
-/* Reduce top spacing for home section */
 .section#home {
-    padding-top: 20px;
-    padding-bottom: 20px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-top: 80px;
+    padding-bottom: 40px;
+    box-sizing: border-box;
 }
 
 .admin-section h3 {
