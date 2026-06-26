@@ -394,8 +394,10 @@
 }
 
 .nav-link {
-  font-size: 0.85rem;
-  font-family: var(--font-sans);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
   text-transform: lowercase;
   color: var(--text-muted);
   transition: color 0.2s;
@@ -424,7 +426,7 @@
 
 .nav-link.active {
   color: var(--accent-green-light);
-  font-weight: 500;
+  font-weight: 700;
 }
 
 .nav-actions {
@@ -514,7 +516,10 @@
 }
 
 .nav-mobile-link {
-  font-size: 0.95rem;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
   color: var(--text-muted);
   padding: 12px 0;
   border-bottom: 1px solid var(--border-default);
