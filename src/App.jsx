@@ -855,7 +855,7 @@ const Hero = ({ data, focusChatInput, chatInputRef }) => {
             if (!apiKey) {
                 // If API Key not set, fallback to simulated responder immediately
                 setTimeout(() => {
-                    const fallbackReply = getFallbackChatResponse(query, data.resumeUrl);
+                    const fallbackReply = getFallbackChatResponse(query, data.hero?.resumeUrl);
                     setChatHistory(prev => [...prev, { id: Date.now() + 1, sender: 'saketh', text: fallbackReply }].slice(-10));
                     setIsTyping(false);
                 }, 1000);
@@ -882,7 +882,7 @@ const Hero = ({ data, focusChatInput, chatInputRef }) => {
                             role: 'system',
                             content: `You are Saketh, an AI & ML engineering student at SRM University-AP, Andhra Pradesh, India. Answer any question about yourself in first person, naturally and conversationally. Keep answers short (2-4 sentences max). You MUST ONLY answer questions by analyzing the following resume present in the database. DO NOT give random results or hallucinate. If you are asked something not in the resume, clearly state you don't have that information.
                             
-If the user asks for your resume or CV, you MUST provide them with this link: ${data.resumeUrl || ''}
+If the user asks for your resume or CV, you MUST provide them with this link: ${data.hero?.resumeUrl || ''}
 
 Here is your exact resume text to use as your knowledge base:
 
@@ -943,7 +943,7 @@ Soft Skills: Problem Solving, Analytical Thinking, Communication, Team Collabora
             // Fallback securely and elegantly
             setTimeout(() => {
                 try {
-                    const fallbackReply = getFallbackChatResponse(query, data.resumeUrl);
+                    const fallbackReply = getFallbackChatResponse(query, data.hero?.resumeUrl);
                     setChatHistory(prev => [...prev, { id: Date.now() + 1, sender: 'saketh', text: fallbackReply }].slice(-10));
                 } catch {
                     setChatHistory(prev => [...prev, { id: Date.now() + 1, sender: 'saketh', text: "Sorry, something went wrong. Let's try again!" }]);
